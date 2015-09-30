@@ -2,3 +2,7 @@ This is a skeleton for CS 111 Lab 1.
 
 Replace this README file with notes on your implementation.
 Mentions any special features or limitations.
+
+Stack Implementation:
+Generic stack data structure used in our algorithm based off of implementation found in a Stanford Lecture here:
+https://see.stanford.edu/materials/icsppcs107/stack-implementation.pdf
