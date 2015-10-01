@@ -28,6 +28,7 @@ timetrash: $(TIMETRASH_OBJECTS)
 alloc.o: alloc.h
 execute-command.o main.o print-command.o read-command.o: command.h
 execute-command.o print-command.o read-command.o: command-internals.h
+read-command.o: symbol.h
 
 dist: $(DISTDIR).tar.gz
 

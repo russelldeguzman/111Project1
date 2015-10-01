@@ -6,3 +6,36 @@ Mentions any special features or limitations.
 Stack Implementation:
 Generic stack data structure used in our algorithm based off of implementation found in a Stanford Lecture here:
 https://see.stanford.edu/materials/icsppcs107/stack-implementation.pdf
+
+
+Our command parsing approach:
+
+if encounters new command:
+	put on command_stack
+if encounters new operator:
+	if operator stack == NULL:
+		push new operator to operator_stack
+	else: 
+		if precedence(new operator) > precedence(operator_stack.top):
+			push new operator to operator_stack
+		else:
+			while(operator_stack.top !='(' && precedence(new operator) <= precedence(operator_stack.top)):
+				operator = operator_stack.pop
+				second_command = command_stack.pop
+				first_command = command_stack.pop
+				new_command = combine(first_command, second_command, new operator)
+				push new_command to command_stack
+				top_operator = operator_stack.peek
+				if top_operator == NULL:
+					break;
+			push new operator to operator_stack
+//process whater is left in the stacks...
+
+//TA NOTE: End condition: your algorithm will be done when:
+	1) The operator stack is empty
+	2) There is only one (fully complete) Node in the command stack (this node is your result) 
+
+
+Input parsing
+=============
+Converting the input to tokens first, to simplify the parsing process.
