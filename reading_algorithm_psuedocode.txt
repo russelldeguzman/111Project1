@@ -24,3 +24,41 @@ if encounters new operator:
 //TA NOTE: End condition: your algorithm will be done when:
 	1) The operator stack is empty
 	2) There is only one (fully complete) Node in the command stack (this node is your result) 
+
+Some important discussion notes:
+
+	pipeline precedence is higher than semicolon
+
+	a;b|c|d;e
+
+	1) b|c
+	2) (b|c)|d
+	3)a((b|c)|d)
+	4)a;b|c|d;e
+
+	Rules: for syntax parsing
+	a)A single new line is treated as a semicolon
+	b) 2 or more new lines result in two different command trees (nodes in linked list)
+	c)Special case of incomplete command where the right operand is missing: 2  or more '\n' have no effect
+
+	a && \n
+	\n
+	\n
+	b 
+	-->a&&b (This is an error)
+
+
+TUANS NEW ALGO (gonna implement this one)
+a)If a simple command, push to a command stack
+b)If it is a "(", push it onto an operator-stack
+c)If it is an Operator and operator stack is empty
+	1)push the operator onto the operator stack
+d)If it is an operator and the operator stack is NOT empty
+	1)Pop all operators with greator or equal precedence off the operator stack
+	  For each popped off Operator, Pop 2 commands  off command stack
+	  combine them into a new command
+	2)Stop when you reach an operator with lower precedence or a "("
+	3)Push the operator onto the stack
+e)If encounter ")", pop operators off the stack (for each operator, pop two commands, combine, push back on command stack) until you find a matching "(". then create a subshell command by popping out 1 command from command stack.
+f)Advance to next word (simple command, and, or) go to a)
+g)When all words are gone, pop each operator and combine them with 2 commands similar to d)
