@@ -31,9 +31,22 @@ void constructSimpleCommand(command_t com, char * parserOutput){
   //TODO
 }
 
-//combines two commands 
+//combines two commands into result
 void combine_commands(command_t right,command_t left ,command_t result, char * op){
   //TODO
+}
+
+//combine_helper: see d) (1-3) in the psuedocode below in make_command_stream
+void combine_helper(stack &opStack, stack &cmdStack, command_t tempOp){
+   command_t r;
+   command_t l;
+   command_t result;
+   popStack(opStack, tempOp);
+   popStack(cmdStack, l);
+   popStack(cmdStack, r);
+   combine_commands(r,l,result, tempOp);
+   pushStack(cmdStack, result);
+   topStack(opStack, tempOp);  
 }
 
 //creates a subshell
@@ -95,15 +108,7 @@ make_command_stream (int (*get_next_byte) (void *),
         char * tempOp;
         topStack(&operatorStack, tempOp);
         while(!StackisEmpty(&operatorStack) && precedence(tempOp)>=precedence(parserOutput) && tempOp != '('){
-          command_t r;
-          command_t l;
-          command_t result;
-          popStack(&operatorStack, tempOp);
-          popStack(&commandStack, l);
-          popStack(&commandStack, r);
-          combine_commands(r,l,result, tempOp);
-          pushStack(&commandStack, result);
-          topStack(&operatorStack, tempOp);
+          combine_helper(&operatorStack, &commandStack, tempOp);
         }
         pushStack(&operatorStack, parserOutput);
       }
@@ -116,15 +121,7 @@ make_command_stream (int (*get_next_byte) (void *),
         char * tempOp;
         topStack(&operatorStack, tempOp);
         while(!StackisEmpty(&operatorStack) && tempOp != '('){
-          command_t r;
-          command_t l;
-          command_t result;
-          popStack(&operatorStack, tempOp);
-          popStack(&commandStack, l);
-          popStack(&commandStack, r);
-          combine_commands(r,l,result, tempOp);
-          pushStack(&commandStack, result);
-          topStack(&operatorStack, tempOp);
+          combine_helper(&operatorStack,&commandStack,tempOp);
         }
         command_t subshellCommand;
         command_t topCommand
@@ -133,23 +130,14 @@ make_command_stream (int (*get_next_byte) (void *),
         createSubshell(topCommand, subshellCommand);
         pushStack(&commandStack, subshellCommand);
       }
-    }
-    //f) Advance to next word (simple command, and, or) go to a)
+    }    //f) Advance to next word (simple command, and, or) go to a)
     
     //g)When all words are gone, pop each operator and 
     //combine them with 2 commands similar to d)
     char * tempOp;
     topStack(&operatorStack, tempOp);
     while(!StackisEmpty(&operatorStack)){
-        command_t r;
-        command_t l;
-        command_t result;
-        popStack(&operatorStack, tempOp);
-        popStack(&commandStack, l);
-        popStack(&commandStack, r);
-        combine_commands(r,l,result, tempOp);
-        pushStack(&commandStack, result);
-        topStack(&operatorStack, tempOp);
+        combine_helper(&operatorStack,&commandStack,tempOp);
     }
     
     command_t rootNode;
