@@ -8,6 +8,7 @@ enum symbol_type {
 	LBRACKET_SYMBOL	// (
 	RBRACKET_SYMBOL	// )
 	SEQUENCE_SYMBOL // ;
+	NEWLINE_SYMBOL  // \n
 };
 
 struct symbol {
