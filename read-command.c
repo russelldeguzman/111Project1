@@ -10,7 +10,7 @@
 #include "stack.h"
 >>>>>>> d13fd33ac2cfed383daec4e1eae1f32a534a7f18
 #include <error.h>
-
+#include "list.h"
 
 /* FIXME: You may need to add #include directives, macro definitions,
    static function definitions, etc.  */
@@ -18,13 +18,17 @@
 //According to Tuan, this is actually the linked list
 //I put the command_node in command-internals
 struct command_stream { 
-	struct command_node *head;
-	struct command_node *tail;
+	struct command_node_t head;
+	struct command_node_t tail;
 };
 
 
 /* FIXME: Define the type 'struct command_stream' here.  This should
    complete the incomplete type declaration in command.h.  */
+void commandStreamInit(command_stream_t stream){
+  stream->head=NULL;
+  stream->tail=NULL;
+}
 
 //Determines whether or not the parser output is a simple command
 bool is_simple_command(char * parserOutput){
@@ -39,6 +43,26 @@ void constructSimpleCommand(command_t com, char * parserOutput){
 //combines two commands into result
 void combine_commands(command_t right,command_t left ,command_t result, char * op){
   //TODO
+  switch(op){
+    case '&&':
+      result->type=AND_COMMAND;
+    break;
+    case';':
+      result->type=SEQUENCE_COMMAND;
+    break;
+    case'||':
+      result->type=OR_COMMAND;
+    break;
+    default:
+      result->type=PIPE_COMMAND; 
+  }
+  result->status=-1; //TODO: for part 1B ( dont worry for 1A)
+  result->input=NULL;
+  result->output=NULL;
+  result->u.command[0]=left;
+  result->u.command[1]=right;
+  result->u.word=NULL; //TODO check this later with TA
+  result->u.subshell_command=NULL;
 }
 
 //combine_helper: see d) (1-3) in the psuedocode below in make_command_stream
@@ -102,14 +126,15 @@ make_command_stream (int (*get_next_byte) (void *),
 	return 0;
 =======
 
-  //TODO: initialize a command_stream linked list
+  //initialize a command_stream linked list
+     command_stream_t stream;
+     commandStreamInit(stream);
 
-  // TODO: Initialize linked list.
-
-  // TODO: Parser from left to right.
-
+  /*TODO: Parser from left to right. Create command_node every time 
+  There's a new command 
+  */
   // The output from this function I will denote as parserOutput for now
-    char * parserOutput; //TODO: FIX THIS
+    char * parserOutput; //TODO: 
 
   //INIT STACKS
     stack operatorStack;
@@ -180,12 +205,17 @@ make_command_stream (int (*get_next_byte) (void *),
         combine_helper(&operatorStack,&commandStack,tempOp);
     }
     
+    //rootNode is now ready to add to the tree.
     command_t rootNode;
-    popStack(&commandStack, rootNode); //rootNode is now ready to add to the tree.
+    popStack(&commandStack, rootNode); 
 
     //TODO: add the rootNode to a command_Node
+
     //TODO: add the command_Node to the linked list
+    append(stream.tail, /*Command_Node*/ ); 
+
     //TODO: return Command_stream linked list
+
   error (1, 0, "command reading not yet implemented");
   return 0;
 >>>>>>> d13fd33ac2cfed383daec4e1eae1f32a534a7f18
