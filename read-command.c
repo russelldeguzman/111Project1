@@ -2,8 +2,13 @@
 
 #include "command.h"
 #include "command-internals.h"
+<<<<<<< HEAD
+#include "symbol.h"
+
+=======
 #include "utils.h"
 #include "stack.h"
+>>>>>>> d13fd33ac2cfed383daec4e1eae1f32a534a7f18
 #include <error.h>
 
 
@@ -61,6 +66,41 @@ make_command_stream (int (*get_next_byte) (void *),
   /* FIXME: Replace this with your implementation.  You may need to
      add auxiliary functions and otherwise modify the source code.
      You can also use external functions defined in the GNU C Library.  */
+<<<<<<< HEAD
+	char current = get_next_byte(get_next_byte_argument);
+	
+	while (current != EOF) { // Parsing
+		switch (current) {
+			case ';':
+				
+				break;
+			case '|':
+				
+				break;
+			case '&':
+				
+				break;
+			case '(':
+				
+				break;
+			case ')':
+				
+				break;
+			case '<':
+				
+				break;
+			case '>':
+				
+				break;
+			default: // Making the dangerous assumption that all other
+					 // characters are safe
+				
+		}
+	}
+		
+	error (1, 0, "command reading not yet implemented");
+	return 0;
+=======
 
   //TODO: initialize a command_stream linked list
 
@@ -148,12 +188,13 @@ make_command_stream (int (*get_next_byte) (void *),
     //TODO: return Command_stream linked list
   error (1, 0, "command reading not yet implemented");
   return 0;
+>>>>>>> d13fd33ac2cfed383daec4e1eae1f32a534a7f18
 }
 
 command_t
 read_command_stream (command_stream_t s)
 {
   /* FIXME: Replace this with your implementation too.  */
-  error (1, 0, "command reading not yet implemented");
-  return 0;
+	error (1, 0, "command reading not yet implemented");
+	return 0;
 }
