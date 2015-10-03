@@ -2,7 +2,7 @@
 
 typedef struct command *command_t;
 typedef struct command_stream *command_stream_t;
-
+typedef struct command_node *command_node_t;
 /* Create a command stream from LABEL, GETBYTE, and ARG.  A reader of
    the command stream will invoke GETBYTE (ARG) to get the next byte.
    GETBYTE will return the next input byte, or a negative number
