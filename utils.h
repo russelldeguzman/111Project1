@@ -4,10 +4,12 @@ functions throughout our program*/
 #define utils
 
 #include <stdbool.h>
+#include <stdio.h>
+#include <string.h>
 
 //Check if a character is one of the special operators.
 bool isOperator(const char *c){
-	if(c == ';' || c == '|' || c == '&&' || c == '||'){
+	if(strncmp(c,";",1) == 0 || strncmp(c,"|",1) == 0 || strncmp(c,"||",2) == 0 || strncmp(c,"&&",2) == 0){
 		return true;
 	}
 	else return false;
@@ -20,21 +22,22 @@ bool isOperator(const char *c){
 //heavily on how we tokenize the operators, but for now, its pretty intuitive
 //as a starting point
 int precedence(char * op){
-	switch(op){
-		case ';'://5ith highest
-			return 1;
-		case '||':
-			return 2;//4th highest for ||
-		case '&&'://4th highest
-			return 2;
-		case '|'://highest
-			return 3;
-		default:
-			//THROW ERROR
-			printf("Invalid! Exiting...\n");
-			exit(-1);		
+	if(strncmp(op,";",1) == 0){
+		return 1;
 	}
-	return -1;
+	else if(strncmp(op,"||",2) == 0){
+		return 2;
+	}
+	else if(strncmp(op,"&&",2) == 0){
+		return 2;
+	}
+	else if(strncmp(op,"|",1) == 0){
+		return 3;
+	}
+	else{
+		printf("Error!\n");
+		return -1;
+	}
 }
 
 #endif
