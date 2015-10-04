@@ -1,37 +1,38 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-
+#include <string.h>
 //TODO: when you finish this, rememeber to COPY THIS OVER TO read-command.c!!
-void parseSimpCommand(char * parserOutput, char *input, char *output, char *word){
-  //TODO: TEST THIS CRAZY FUNCTION
+void parseSimpCommand(char * parserOutput, char **input, char **output, char **word){
   int pos = 0;
   int hasInput = -1; //represents the position of '<'
   int hasOutput = -1; //represents the position of '>'
   while(parserOutput[pos] != '\0'){ //TODO: remember to end strings with '\0'
-    if(parserOutput[pos] == '<') hasInput = pos;
+    if(parserOutput[pos] == '<') hasInput = pos; 
     if(parserOutput[pos] == '>') hasOutput = pos; 
     pos = pos + 1;
   }
-
   if(hasOutput == -1 && hasInput == -1){ //CASE 1: NO I/O REDIRECTION
-    *input = 0;
-    *output = 0; 
-    word = parserOutput;
+    *input = NULL;
+    *output = NULL; 
+    *word = malloc(sizeof(parserOutput));
+    strcpy(*word , parserOutput);
     return;
   }
+
   if(hasOutput != -1 && hasInput == -1){//CASE 2: Output but no Input
-    char *result_word = (char *) malloc(sizeof(char) * pos);
-    char *output_word = (char *) malloc(sizeof(char) * pos);
+    char result_word[pos];
+    char output_word[pos];
     int i;
 
     for(i = 0; i < hasOutput; i++){
       result_word[i] = parserOutput[i]; //get result word
     }
-
+    
     if(isspace(result_word[hasOutput-1])){ //elim whitespace before > if there is one
       result_word[hasOutput - 1] = '\0';
     }
+
     else{
       result_word[hasOutput] = '\0';
     }
@@ -39,6 +40,7 @@ void parseSimpCommand(char * parserOutput, char *input, char *output, char *word
     if(isspace(parserOutput[hasOutput + 1])){
       i = hasOutput + 2; //elim whitespace after > if there is any
     }
+
     else{
       i = hasOutput + 1;
     }
@@ -48,14 +50,18 @@ void parseSimpCommand(char * parserOutput, char *input, char *output, char *word
     }
     output_word[pos - offset] = '\0';
 
-    *input = 0;
-    output = output_word;
-    word = result_word;
+    *input = NULL;
+    *output = malloc(sizeof(output_word));
+    *word = malloc(sizeof(result_word));
+    strcpy(*output, output_word);
+    strcpy(*word, result_word);
+
     return;
+    
   } 
   if(hasOutput == -1 && hasInput != -1){//CASE 3: Input but no Output
-    char *result_word = (char *) malloc(sizeof(char) * pos);
-    char *input_word = (char *) malloc(sizeof(char) * pos);
+    char result_word[pos];
+    char input_word[pos];
     int i;
 
     for(i = 0; i<hasInput; i++){
@@ -82,19 +88,21 @@ void parseSimpCommand(char * parserOutput, char *input, char *output, char *word
     }
     input_word[pos - offset] = '\0';
 
+    *input = malloc(sizeof(input_word));
+    *word = malloc(sizeof(result_word));
     *output = 0; 
-    word =  result_word;
-    input = input_word;
+    strcpy(*word,result_word);
+    strcpy(*input,input_word);
     return;
   }
   if(hasInput != -1 && hasOutput != -1){//CASE 4: has both I/O
     //In test cases, Input always comes before Output, so I'm going to assume that's 
     //the correct syntax. 
-    char *result_word = (char *) malloc(sizeof(char) * pos);
-    char *input_word = (char *) malloc(sizeof(char) * pos);
-    char *output_word = (char *) malloc(sizeof(char) * pos);
+    char result_word[pos];
+    char input_word[pos];
+    char output_word[pos];
     int i;
-    for(int i = 0; i < hasInput; i++){
+    for(i = 0; i < hasInput; i++){
       result_word[i] = parserOutput[i]; //get result file word
     }
     if(isspace(result_word[hasInput-1])){ //elim whitespace before < if there is one
@@ -135,20 +143,23 @@ void parseSimpCommand(char * parserOutput, char *input, char *output, char *word
     }
     output_word[pos - offset] = '\0';
 
-    output = output_word; 
-    word =  result_word;
-    input = input_word;
+    *input = malloc(sizeof(input_word));
+    *word = malloc(sizeof(result_word));
+    *output = malloc(sizeof(output_word)); 
+    strcpy(*word,result_word);
+    strcpy(*input,input_word);
+    strcpy(*output, output_word);
     return;
   }
   printf("No events triggered! Error!\n");
 }
 
 int main(int argc, char **argv){
-  char parserOutput[] = "g++ -c foo.c"; 
+  char parserOutput[] = "a<b>c"; 
   char *input; char *output; char *word;
-  parseSimpCommand(parserOutput, input, output, word);
-  printf("%s\n", word);
-  printf("%s\n", input);
-  printf("%s\n", output);
+  parseSimpCommand(parserOutput, &input, &output, &word);
+  if(input)  printf("%s\n", input);
+  if(word) printf("%s\n", word);
+  if(output) printf("%s\n", output);
 }
 
