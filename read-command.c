@@ -2,13 +2,10 @@
 
 #include "command.h"
 #include "command-internals.h"
-<<<<<<< HEAD
 #include "symbol.h"
 
-=======
 #include "utils.h"
 #include "stack.h"
->>>>>>> d13fd33ac2cfed383daec4e1eae1f32a534a7f18
 #include <error.h>
 
 
@@ -17,7 +14,7 @@
 
 //According to Tuan, this is actually the linked list
 //I put the command_node in command-internals
-struct command_stream { 
+struct command_stream {
 	struct command_node *head;
 	struct command_node *tail;
 };
@@ -51,7 +48,7 @@ void combine_helper(stack &opStack, stack &cmdStack, command_t tempOp){
    popStack(cmdStack, r);
    combine_commands(r,l,result, tempOp);
    pushStack(cmdStack, result);
-   topStack(opStack, tempOp);  
+   topStack(opStack, tempOp);
 }
 
 //creates a subshell
@@ -66,8 +63,8 @@ make_command_stream (int (*get_next_byte) (void *),
   /* FIXME: Replace this with your implementation.  You may need to
      add auxiliary functions and otherwise modify the source code.
      You can also use external functions defined in the GNU C Library.  */
-<<<<<<< HEAD
 	char current = get_next_byte(get_next_byte_argument);
+	command_stream_t 
 	
 	while (current != EOF) { // Parsing
 		switch (current) {
@@ -100,7 +97,6 @@ make_command_stream (int (*get_next_byte) (void *),
 		
 	error (1, 0, "command reading not yet implemented");
 	return 0;
-=======
 
   //TODO: initialize a command_stream linked list
 
@@ -188,7 +184,6 @@ make_command_stream (int (*get_next_byte) (void *),
     //TODO: return Command_stream linked list
   error (1, 0, "command reading not yet implemented");
   return 0;
->>>>>>> d13fd33ac2cfed383daec4e1eae1f32a534a7f18
 }
 
 command_t
