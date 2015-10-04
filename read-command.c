@@ -4,12 +4,17 @@
 #include "command-internals.h"
 #include "symbol.h"
 
-=======
 #include "utils.h"
 #include "stack.h"
 #include <error.h>
 #include <string.h>
 #include "list.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+
+
 
 /* FIXME: You may need to add #include directives, macro definitions,
    static function definitions, etc.  */
@@ -349,10 +354,8 @@ make_command_stream (int (*get_next_byte) (void *),
     //TODO: add the command_Node to the linked list
     append(stream.tail, /*Command_Node*/ ); 
 
-    //TODO: return Command_stream linked list
-
-  error (1, 0, "command reading not yet implemented");
-  return 0;
+    //return Command_stream linked list
+    return stream;
 }
 
 command_t
