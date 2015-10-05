@@ -194,7 +194,7 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char **w
 
 //breaks up the simple command from the parser and constructs command
 void constructSimpleCommand(command_t com, char * parserOutput){
-
+  com = malloc(sizeof(command));
   com->type = SIMPLE_COMMAND; 
   com->status =  -1; //TODO: EDIT THIS IN LAB 1B
   parseSimpCommand(parserOutput, com->&input, com->&output, com->u.word/*TODO: Need to check this*/);
@@ -210,8 +210,8 @@ void combine_commands(command_t right,command_t left ,command_t result, char * o
   else result->type = PIPE_COMMAND; 
   
   result->status = -1; //TODO: for part 1B ( dont worry for 1A)
-  result->*input = 0;
-  result->*output = 0;
+  result->input = NULL;
+  result->output = NULL;
   result->u.command[0] = left;
   result->u.command[1] = right;
 }
@@ -220,7 +220,7 @@ void combine_commands(command_t right,command_t left ,command_t result, char * o
 void combine_helper(stack &opStack, stack &cmdStack, char * tempOp){
    command_t r;
    command_t l;
-   command_t result;
+   command_t result = malloc(sizeof(command));
    popStack(opStack, tempOp);
    popStack(cmdStack, l);
    popStack(cmdStack, r);
@@ -231,10 +231,11 @@ void combine_helper(stack &opStack, stack &cmdStack, char * tempOp){
 
 //creates a subshell
 void createSubshell(command_t topCommand, command_t subshellCommand){
+  subshellCommand = malloc(sizeof(command));
   subshellCommand->type = SUBSHELL_COMMAND;
   subshellCommand->status = -1; //TODO: change this in 1B.
-  subshellCommand->*input = 0;
-  subshellCommand->*output = 0;
+  subshellCommand->input = NULL;
+  subshellCommand->output = NULL;
   subshellCommand->u.subshell_command = topCommand;
 }
 
