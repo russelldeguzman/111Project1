@@ -36,7 +36,7 @@ void commandStreamInit(command_stream_t stream){
 
 //Determines whether or not the parser output is a simple command
 bool is_simple_command(char * parserOutput){
-  if(!isOperator(parserOutput) && strncmp(parserOutput,'\n',1) != 0) return true;
+  if(!isOperator(parserOutput) && strncmp(parserOutput,"\n",1) != 0) return true;
   return false;
 }
 
@@ -217,7 +217,7 @@ void combine_commands(command_t right,command_t left ,command_t result, char * o
 }
 
 //combine_helper: see d) (1-3) in the psuedocode below in make_command_stream
-void combine_helper(stack &opStack, stack &cmdStack, command_t tempOp){
+void combine_helper(stack &opStack, stack &cmdStack, char * tempOp){
    command_t r;
    command_t l;
    command_t result;
@@ -291,18 +291,18 @@ make_command_stream (int (*get_next_byte) (void *),
     stack operatorStack;
     stack commandStack;
     newStack(&commandStack,sizeof(command_t));
-    newstack(&operatorStack,sizeof(char *));
+    newstack(&operatorStack,sizeof(char)* 3); //3 is the max length of a string for stuff like (&&\0) or (||\0)
     while(/*!EOF from input*/)
     {
       //a)If a simple command, push to a command stack
       if(is_simple_command(parserOutput)){
         command_t simpCommand;
-        constructSimpleCommand(simpCommand, parserOutput)
+        constructSimpleCommand(simpCommand, parserOutput);
         pushStack(&commandStack, simpCommand);
       }
       
       //b)If it is a "(", push it onto an operator-stack
-      if(parserOutput == '('){
+      if(strcmp(parserOutput,"(",1) == 0){
         pushStack(&operatorStack, parserOutput);
       }
       
@@ -323,7 +323,7 @@ make_command_stream (int (*get_next_byte) (void *),
       if(isOperator(parserOutput) && !StackisEmpty(&operatorStack)){
         char * tempOp;
         topStack(&operatorStack, tempOp);
-        while(!StackisEmpty(&operatorStack) && precedence(tempOp)>=precedence(parserOutput) && tempOp != '('){
+        while(!StackisEmpty(&operatorStack) && precedence(tempOp)>=precedence(parserOutput) && strcmp(tempOp,"(",1) != 0){
           combine_helper(&operatorStack, &commandStack, tempOp);
         }
         pushStack(&operatorStack, parserOutput);
@@ -333,14 +333,14 @@ make_command_stream (int (*get_next_byte) (void *),
     //(for each operator, pop two commands, combine, push back on command stack) 
     //until you find a matching "(". then create a subshell command by popping 
     //out 1 command from command stack.
-      if(parserOutput = ')'){
+      if(strcmp(parserOutput,")",1) == 0){
         char * tempOp;
         topStack(&operatorStack, tempOp);
-        while(!StackisEmpty(&operatorStack) && tempOp != '('){
+        while(!StackisEmpty(&operatorStack) && strcmp(tempOp,"(",1) != 0){
           combine_helper(&operatorStack,&commandStack,tempOp);
         }
         command_t subshellCommand;
-        command_t topCommand
+        command_t topCommand;
         popStack(&commandStack, topCommand);
         popStack(&operatorStack,tempOp);
         createSubshell(topCommand, subshellCommand);
