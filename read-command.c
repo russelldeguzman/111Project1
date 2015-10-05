@@ -53,7 +53,7 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char **w
   if(hasOutput == -1 && hasInput == -1){ //CASE 1: NO I/O REDIRECTION
     *input = NULL;
     *output = NULL; 
-    *word = malloc(sizeof(parserOutput));
+    *word = (char *) malloc(sizeof(parserOutput));
     strcpy(*word , parserOutput);
     return;
   }
@@ -89,8 +89,8 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char **w
     output_word[pos - offset] = '\0';
 
     *input = NULL;
-    *output = malloc(sizeof(output_word));
-    *word = malloc(sizeof(result_word));
+    *output = (char *) malloc(sizeof(output_word));
+    *word = (char *)malloc(sizeof(result_word));
     strcpy(*output, output_word);
     strcpy(*word, result_word);
 
@@ -126,8 +126,8 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char **w
     }
     input_word[pos - offset] = '\0';
 
-    *input = malloc(sizeof(input_word));
-    *word = malloc(sizeof(result_word));
+    *input = (char *)malloc(sizeof(input_word));
+    *word = (char *)malloc(sizeof(result_word));
     *output = NULL; 
     strcpy(*word,result_word);
     strcpy(*input,input_word);
@@ -181,9 +181,9 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char **w
     }
     output_word[pos - offset] = '\0';
 
-    *input = malloc(sizeof(input_word));
-    *word = malloc(sizeof(result_word));
-    *output = malloc(sizeof(output_word)); 
+    *input = (char *)malloc(sizeof(input_word));
+    *word = (char *)malloc(sizeof(result_word));
+    *output = (char *)malloc(sizeof(output_word)); 
     strcpy(*word,result_word);
     strcpy(*input,input_word);
     strcpy(*output, output_word);
@@ -194,7 +194,7 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char **w
 
 //breaks up the simple command from the parser and constructs command
 void constructSimpleCommand(command_t com, char * parserOutput){
-  com = malloc(sizeof(command));
+  com = (command_t) malloc(sizeof(struct command));
   com->type = SIMPLE_COMMAND; 
   com->status =  -1; //TODO: EDIT THIS IN LAB 1B
   parseSimpCommand(parserOutput, com->&input, com->&output, com->u.word/*TODO: Need to check this*/);
@@ -220,7 +220,7 @@ void combine_commands(command_t right,command_t left ,command_t result, char * o
 void combine_helper(stack &opStack, stack &cmdStack, char * tempOp){
    command_t r;
    command_t l;
-   command_t result = malloc(sizeof(command));
+   command_t result = (command_t) malloc(sizeof(struct command));
    popStack(opStack, tempOp);
    popStack(cmdStack, l);
    popStack(cmdStack, r);
@@ -231,7 +231,7 @@ void combine_helper(stack &opStack, stack &cmdStack, char * tempOp){
 
 //creates a subshell
 void createSubshell(command_t topCommand, command_t subshellCommand){
-  subshellCommand = malloc(sizeof(command));
+  subshellCommand = (command_t) malloc(sizeof(struct command));
   subshellCommand->type = SUBSHELL_COMMAND;
   subshellCommand->status = -1; //TODO: change this in 1B.
   subshellCommand->input = NULL;
