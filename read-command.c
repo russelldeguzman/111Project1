@@ -372,7 +372,7 @@ make_command_stream (int (*get_next_byte) (void *),
 command_t
 read_command_stream (command_stream_t s)
 {
-  /* FIXME: Replace this with your implementation too.  */
-	error (1, 0, "command reading not yet implemented");
-	return 0;
+  command_node_t current = s->head;
+  s->head = current -> next;
+  return current -> root; 
 }

@@ -155,7 +155,7 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char **w
 }
 
 int main(int argc, char **argv){
-  char parserOutput[] = "a<b>c"; 
+  char parserOutput[] = "a x<b>c"; 
   char *input; char *output; char *word;
   parseSimpCommand(parserOutput, &input, &output, &word);
   if(input)  printf("%s\n", input);
