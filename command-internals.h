@@ -38,6 +38,6 @@ struct command
 //Command Node
 struct command_node
 {
-  struct command *root;
-  struct command_node *next;
+  struct command_t root;
+  struct command_node_t next;
 };
