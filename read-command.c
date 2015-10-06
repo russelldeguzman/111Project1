@@ -242,6 +242,11 @@ void createSubshell(command_t topCommand, command_t subshellCommand){
 
 //Helper for turning simple commands into tokens
 void createSimpCommand(symbol_t &sym, int &len, int &maxLen, char *&data){
+	if (len == maxLen) {
+		maxLen += 1;
+		data = realloc(data, maxLen*sizeof(char));
+	}
+	data[len] = '\0';
 	sym->simple_command = data;
 	createSymbol(sym, COMMAND_SYMBOL);
 	
@@ -255,6 +260,7 @@ void createSymbol(symbol_t &sym, symbol_type type) {
 	symbol_t tempSymbol = newSymbol();
 	sym->next = tempSymbol;
 	sym = tempSymbol;
+	sym->next = NULL;
 }
 
 command_stream_t
@@ -367,8 +373,8 @@ make_command_stream (int (*get_next_byte) (void *),
 		}
 	}
 		
-	error (1, 0, "command reading not yet implemented");
-	return 0;
+	//error (1, 0, "command reading not yet implemented");
+	//return 0;
 
   //TODO: initialize a command_stream linked list
 
@@ -377,11 +383,14 @@ make_command_stream (int (*get_next_byte) (void *),
      commandStreamInit(stream);
 
   /*TODO: Parser from left to right. Create command_node every time 
-  There's a new command 
+  There's a new command
   */
   // The output from this function I will denote as parserOutput for now
-    char * parserOutput; //TODO: 
-
+  //  char * parserOutput; //TODO: 
+  // Formerly parserOutput, now we use currentSymbol to denote the
+  // current output node.
+	currentSymbol = headSymbol;
+	
   //INIT STACKS
     stack operatorStack;
     stack commandStack;
@@ -395,7 +404,7 @@ make_command_stream (int (*get_next_byte) (void *),
         constructSimpleCommand(simpCommand, parserOutput);
         pushStack(&commandStack, simpCommand);
       }
-      
+
       //b)If it is a "(", push it onto an operator-stack
       if(strcmp(parserOutput,"(",1) == 0){
         pushStack(&operatorStack, parserOutput);
