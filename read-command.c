@@ -14,13 +14,14 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-
+#define initialSize 5;
 
 /* FIXME: You may need to add #include directives, macro definitions,
    static function definitions, etc.  */
 
 //According to Tuan, this is actually the linked list
 //I put the command_node in command-internals
+
 struct command_stream { 
 	struct command_node_t head;
 	struct command_node_t tail;
@@ -226,7 +227,7 @@ void combine_helper(stack &opStack, stack &cmdStack, char * tempOp){
    popStack(cmdStack, r);
    combine_commands(r,l,result, tempOp);
    pushStack(cmdStack, result);
-   topStack(opStack, tempOp);  
+   topStack(opStack, tempOp);
 }
 
 //creates a subshell
@@ -239,6 +240,29 @@ void createSubshell(command_t topCommand, command_t subshellCommand){
   subshellCommand->u.subshell_command = topCommand;
 }
 
+//Helper for turning simple commands into tokens
+void createSimpCommand(symbol_t &sym, int &len, int &maxLen, char *&data){
+	if (len == maxLen) {
+		maxLen += 1;
+		data = realloc(data, maxLen*sizeof(char));
+	}
+	data[len] = '\0';
+	sym->simple_command = data;
+	createSymbol(sym, COMMAND_SYMBOL);
+	
+	int len = 0;
+	int maxLen = initialSize;
+    char *data = malloc(initialSize * sizeof(char));
+}
+
+void createSymbol(symbol_t &sym, symbol_type type) {
+	sym->type = type;
+	symbol_t tempSymbol = newSymbol();
+	sym->next = tempSymbol;
+	sym = tempSymbol;
+	sym->next = NULL;
+}
+
 command_stream_t
 make_command_stream (int (*get_next_byte) (void *),
 		     void *get_next_byte_argument)
@@ -246,48 +270,127 @@ make_command_stream (int (*get_next_byte) (void *),
   /* FIXME: Replace this with your implementation.  You may need to
      add auxiliary functions and otherwise modify the source code.
      You can also use external functions defined in the GNU C Library.  */
-	char current = get_next_byte(get_next_byte_argument);
+	char currentChar = get_next_byte(get_next_byte_argument);
 	
+	int commandLength = 0;
+	int allocLength = initialSize;
+	char *simpleCommand = malloc(initialSize * sizeof(char));
+	
+	int empty = 0; // Tracking whether the last simple command was empty.
+				   // 0 = empty, 1 = not empty
+	int skip = 0;  // Skips the character read at the end of each
+				   // iteration of while: ugly workaround to
+				   // distinguishing | and ||
+	
+	symbol_t currentSymbol = newSymbol();
+	symbol_t headSymbol = currentSymbol;
+	symbol_t tempSymbol;
+
 	while (current != EOF) { // Parsing
 		switch (current) {
 			case ';':
-				
+				assert(empty == 1); // Assert that there is a non-null
+									// command prior, or the operation is
+									// invalid.
+				createSimpCommand(currentSym, commandLength,
+									allocLength, simpleCommand);
+				currentSymbol->type = SEQUENCE_SYMBOL;
+				createSymbol(sym, SEQUENCE_SYMBOL);
 				break;
 			case '|':
-				
+				assert(empty == 1);
+				createSimpCommand(currentSym, commandLength,
+									allocLength, simpleCommand);
+					// Check the next character. If it's also a pipe, we
+					// have an or operator. If it's anything else, it's
+					// just a pipe.
+				if (get_next_byte(get_next_byte_argument) == '|') {
+					createSymbol(sym, OR_SYMBOL);
+				} else {
+					createSymbol(sym, PIPE_SYMBOL);
+				}
+				skip = 1;
 				break;
 			case '&':
+				assert(empty == 1);
+				createSimpCommand(currentSym, commandLength,
+									allocLength, simpleCommand);
+				assert (get_next_byte(get_next_byte_argument) == '&');
+					// If the & character isn't followed by another one,
+					// the operator is invalid.
+				createSymbol(sym, AND_SYMBOL);
 				
 				break;
 			case '(':
+				if (empty == 1) { // There does not necessarily need to
+								  // be a simple command before a '('
+				createSimpCommand(currentSym, commandLength,
+									allocLength, simpleCommand);
+				}
 				
+				createSymbol(sym, LBRACKET_SYMBOL);
 				break;
 			case ')':
+				assert(empty == 1);
+				createSimpCommand(currentSym, commandLength,
+									allocLength, simpleCommand);
 				
+				createSymbol(sym, RBRACKET_SYMBOL);
 				break;
-			case '<':
-				
-				break;
-			case '>':
+			case '#': // Advance to end of line. No break becase # is
+					  // an effective newline
+				while (current != '\n') {
+					get_next_byte(get_next_byte_argument);
+				}
+			case '\n':
+				if (empty == 1) {
+				createSimpCommand(currentSym, commandLength,
+									allocLength, simpleCommand);
+				}
+				currentSymbol->type = NEWLINE_SYMBOL;
+				tempSymbol = newSymbol();
+				currentSym->next = tempSymbol;
+				currentSym = tempSymbol;
 				
 				break;
 			default: // Making the dangerous assumption that all other
 					 // characters are safe
-				
+				if (empty == 0 && currentChar != ' ') {
+					empty = 1;
+				}
+				if (commandLength == allocLength) {
+					allocLength *= 2;
+					simpleCommand = realloc(simpleCommand, allocLength *
+									sizeof(char));
+				}
+				simpleCommand[commandLength++] = current;
+				break;
+		}
+		if (skip == 0) {
+			current = get_next_byte(get_next_byte_argument);
+		} else {
+			skip = 0;
 		}
 	}
 		
+	//error (1, 0, "command reading not yet implemented");
+	//return 0;
+
+  //TODO: initialize a command_stream linked list
 
   //initialize a command_stream linked list
      command_stream_t stream;
      commandStreamInit(stream);
 
   /*TODO: Parser from left to right. Create command_node every time 
-  There's a new command 
+  There's a new command
   */
   // The output from this function I will denote as parserOutput for now
-    char * parserOutput; //TODO: 
-
+  //  char * parserOutput; //TODO: 
+  // Formerly parserOutput, now we use currentSymbol to denote the
+  // current output node.
+	currentSymbol = headSymbol;
+	
   //INIT STACKS
     stack operatorStack;
     stack commandStack;
@@ -301,7 +404,7 @@ make_command_stream (int (*get_next_byte) (void *),
         constructSimpleCommand(simpCommand, parserOutput);
         pushStack(&commandStack, simpCommand);
       }
-      
+
       //b)If it is a "(", push it onto an operator-stack
       if(strcmp(parserOutput,"(",1) == 0){
         pushStack(&operatorStack, parserOutput);
@@ -364,6 +467,7 @@ make_command_stream (int (*get_next_byte) (void *),
     //TODO: add the rootNode to a command_Node
 
     //TODO: add the command_Node to the linked list
+
     append(stream.tail, /*Command_Node*/ ); 
 
     //return Command_stream linked list

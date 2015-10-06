@@ -1,7 +1,8 @@
+typedef struct symbol *symbol_t;
+typedef struct symbol_header *symbol_header_t;
+
 enum symbol_type {
 	COMMAND_SYMBOL,	// Regular commands
-	LT_SYMBOL,	// <
-	GT_SYMBOL,	// >
 	OR_SYMBOL,	// ||
 	AND_SYMBOL,	// &&
 	PIPE_SYMBOL,	// |
@@ -13,7 +14,9 @@ enum symbol_type {
 
 struct symbol {
 	enum symbol_type type;
-
+	char *simple_command;
 	struct symbol *next;
-}	
-	
+};
+
+// Create a new symbol
+symbol_t newSymbol();
