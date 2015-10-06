@@ -7,14 +7,6 @@ functions throughout our program*/
 #include <stdio.h>
 #include <string.h>
 
-//Check if a character is one of the special operators.
-bool isOperator(const char *c){
-	if(strncmp(c,";",1) == 0 || strncmp(c,"|",1) == 0 || strncmp(c,"||",2) == 0 || strncmp(c,"&&",2) == 0){
-		return true;
-	}
-	else return false;
-}
-
 //Determines the precedence of the Operator and returns an integer value
 //Input: op -- input operator, multi is for the special case double characers
 //such as  && or || 

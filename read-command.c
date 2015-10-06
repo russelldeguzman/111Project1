@@ -35,12 +35,6 @@ void commandStreamInit(command_stream_t stream){
   stream->tail = NULL;
 }
 
-//Determines whether or not the parser output is a simple command
-bool is_simple_command(char * parserOutput){
-  if(!isOperator(parserOutput) && strncmp(parserOutput,"\n",1) != 0) return true;
-  return false;
-}
-
 // goes through an idetnified simple command and checks for input and output redirection and puts it inside the command
 void parseSimpCommand(char * parserOutput, char **input, char **output, char **word){
   int pos = 0;
