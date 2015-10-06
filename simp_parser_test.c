@@ -15,7 +15,7 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char **w
   if(hasOutput == -1 && hasInput == -1){ //CASE 1: NO I/O REDIRECTION
     *input = NULL;
     *output = NULL; 
-    *word = malloc(sizeof(parserOutput));
+    *word =(char *) malloc(sizeof(parserOutput));
     strcpy(*word , parserOutput);
     return;
   }
@@ -51,8 +51,8 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char **w
     output_word[pos - offset] = '\0';
 
     *input = NULL;
-    *output = malloc(sizeof(output_word));
-    *word = malloc(sizeof(result_word));
+    *output = (char* )malloc(sizeof(output_word));
+    *word = (char* )malloc(sizeof(result_word));
     strcpy(*output, output_word);
     strcpy(*word, result_word);
 
@@ -88,8 +88,8 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char **w
     }
     input_word[pos - offset] = '\0';
 
-    *input = malloc(sizeof(input_word));
-    *word = malloc(sizeof(result_word));
+    *input = (char* )malloc(sizeof(input_word));
+    *word = (char* )malloc(sizeof(result_word));
     *output = 0; 
     strcpy(*word,result_word);
     strcpy(*input,input_word);
@@ -143,9 +143,9 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char **w
     }
     output_word[pos - offset] = '\0';
 
-    *input = malloc(sizeof(input_word));
-    *word = malloc(sizeof(result_word));
-    *output = malloc(sizeof(output_word)); 
+    *input = (char* )malloc(sizeof(input_word));
+    *word = (char* )malloc(sizeof(result_word));
+    *output = (char* )malloc(sizeof(output_word)); 
     strcpy(*word,result_word);
     strcpy(*input,input_word);
     strcpy(*output, output_word);
@@ -155,7 +155,7 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char **w
 }
 
 int main(int argc, char **argv){
-  char parserOutput[] = "a<b>c"; 
+  char parserOutput[] = "a xb>dc"; 
   char *input; char *output; char *word;
   parseSimpCommand(parserOutput, &input, &output, &word);
   if(input)  printf("%s\n", input);

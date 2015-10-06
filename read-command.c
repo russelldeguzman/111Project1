@@ -37,7 +37,7 @@ void commandStreamInit(command_stream_t stream){
 
 //Determines whether or not the parser output is a simple command
 bool is_simple_command(char * parserOutput){
-  if(!isOperator(parserOutput) && strncmp(parserOutput,'\n',1) != 0) return true;
+  if(!isOperator(parserOutput) && strncmp(parserOutput,"\n",1) != 0) return true;
   return false;
 }
 
@@ -54,7 +54,7 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char **w
   if(hasOutput == -1 && hasInput == -1){ //CASE 1: NO I/O REDIRECTION
     *input = NULL;
     *output = NULL; 
-    *word = malloc(sizeof(parserOutput));
+    *word = (char *) malloc(sizeof(parserOutput));
     strcpy(*word , parserOutput);
     return;
   }
@@ -90,8 +90,8 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char **w
     output_word[pos - offset] = '\0';
 
     *input = NULL;
-    *output = malloc(sizeof(output_word));
-    *word = malloc(sizeof(result_word));
+    *output = (char *) malloc(sizeof(output_word));
+    *word = (char *)malloc(sizeof(result_word));
     strcpy(*output, output_word);
     strcpy(*word, result_word);
 
@@ -127,8 +127,8 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char **w
     }
     input_word[pos - offset] = '\0';
 
-    *input = malloc(sizeof(input_word));
-    *word = malloc(sizeof(result_word));
+    *input = (char *)malloc(sizeof(input_word));
+    *word = (char *)malloc(sizeof(result_word));
     *output = NULL; 
     strcpy(*word,result_word);
     strcpy(*input,input_word);
@@ -182,9 +182,9 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char **w
     }
     output_word[pos - offset] = '\0';
 
-    *input = malloc(sizeof(input_word));
-    *word = malloc(sizeof(result_word));
-    *output = malloc(sizeof(output_word));
+    *input = (char *)malloc(sizeof(input_word));
+    *word = (char *)malloc(sizeof(result_word));
+    *output = (char *)malloc(sizeof(output_word)); 
     strcpy(*word,result_word);
     strcpy(*input,input_word);
     strcpy(*output, output_word);
@@ -195,7 +195,7 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char **w
 
 //breaks up the simple command from the parser and constructs command
 void constructSimpleCommand(command_t com, char * parserOutput){
-
+  com = (command_t) malloc(sizeof(struct command));
   com->type = SIMPLE_COMMAND; 
   com->status =  -1; //TODO: EDIT THIS IN LAB 1B
   parseSimpCommand(parserOutput, com->&input, com->&output, com->u.word/*TODO: Need to check this*/);
@@ -211,17 +211,17 @@ void combine_commands(command_t right,command_t left ,command_t result, char * o
   else result->type = PIPE_COMMAND; 
   
   result->status = -1; //TODO: for part 1B ( dont worry for 1A)
-  result->*input = 0;
-  result->*output = 0;
+  result->input = NULL;
+  result->output = NULL;
   result->u.command[0] = left;
   result->u.command[1] = right;
 }
 
 //combine_helper: see d) (1-3) in the psuedocode below in make_command_stream
-void combine_helper(stack &opStack, stack &cmdStack, command_t tempOp){
+void combine_helper(stack &opStack, stack &cmdStack, char * tempOp){
    command_t r;
    command_t l;
-   command_t result;
+   command_t result = (command_t) malloc(sizeof(struct command));
    popStack(opStack, tempOp);
    popStack(cmdStack, l);
    popStack(cmdStack, r);
@@ -232,10 +232,11 @@ void combine_helper(stack &opStack, stack &cmdStack, command_t tempOp){
 
 //creates a subshell
 void createSubshell(command_t topCommand, command_t subshellCommand){
+  subshellCommand = (command_t) malloc(sizeof(struct command));
   subshellCommand->type = SUBSHELL_COMMAND;
   subshellCommand->status = -1; //TODO: change this in 1B.
-  subshellCommand->*input = 0;
-  subshellCommand->*output = 0;
+  subshellCommand->input = NULL;
+  subshellCommand->output = NULL;
   subshellCommand->u.subshell_command = topCommand;
 }
 
@@ -385,18 +386,18 @@ make_command_stream (int (*get_next_byte) (void *),
     stack operatorStack;
     stack commandStack;
     newStack(&commandStack,sizeof(command_t));
-    newstack(&operatorStack,sizeof(char *));
+    newstack(&operatorStack,sizeof(char)* 3); //3 is the max length of a string for stuff like (&&\0) or (||\0)
     while(/*!EOF from input*/)
     {
       //a)If a simple command, push to a command stack
       if(is_simple_command(parserOutput)){
         command_t simpCommand;
-        constructSimpleCommand(simpCommand, parserOutput)
+        constructSimpleCommand(simpCommand, parserOutput);
         pushStack(&commandStack, simpCommand);
       }
       
       //b)If it is a "(", push it onto an operator-stack
-      if(parserOutput == '('){
+      if(strcmp(parserOutput,"(",1) == 0){
         pushStack(&operatorStack, parserOutput);
       }
       
@@ -417,7 +418,7 @@ make_command_stream (int (*get_next_byte) (void *),
       if(isOperator(parserOutput) && !StackisEmpty(&operatorStack)){
         char * tempOp;
         topStack(&operatorStack, tempOp);
-        while(!StackisEmpty(&operatorStack) && precedence(tempOp)>=precedence(parserOutput) && tempOp != '('){
+        while(!StackisEmpty(&operatorStack) && precedence(tempOp)>=precedence(parserOutput) && strcmp(tempOp,"(",1) != 0){
           combine_helper(&operatorStack, &commandStack, tempOp);
         }
         pushStack(&operatorStack, parserOutput);
@@ -427,14 +428,14 @@ make_command_stream (int (*get_next_byte) (void *),
     //(for each operator, pop two commands, combine, push back on command stack) 
     //until you find a matching "(". then create a subshell command by popping 
     //out 1 command from command stack.
-      if(parserOutput = ')'){
+      if(strcmp(parserOutput,")",1) == 0){
         char * tempOp;
         topStack(&operatorStack, tempOp);
-        while(!StackisEmpty(&operatorStack) && tempOp != '('){
+        while(!StackisEmpty(&operatorStack) && strcmp(tempOp,"(",1) != 0){
           combine_helper(&operatorStack,&commandStack,tempOp);
         }
         command_t subshellCommand;
-        command_t topCommand
+        command_t topCommand;
         popStack(&commandStack, topCommand);
         popStack(&operatorStack,tempOp);
         createSubshell(topCommand, subshellCommand);
@@ -467,7 +468,7 @@ make_command_stream (int (*get_next_byte) (void *),
 command_t
 read_command_stream (command_stream_t s)
 {
-  /* FIXME: Replace this with your implementation too.  */
-	error (1, 0, "command reading not yet implemented");
-	return 0;
+  command_node_t current = s->head;
+  s->head = current -> next;
+  return current -> root; 
 }
