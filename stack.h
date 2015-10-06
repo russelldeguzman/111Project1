@@ -20,7 +20,7 @@ typedef struct{
 	void *data; //data pointer
 	int dataSize; //the size of the particular data (e.g. sizeof(int))
 	int length; //number of elements in the container
-	int allocLength; //the length of memory reserved for this container 
+int allocLength; //the length of memory reserved for this container 
 } stack;
 
 // STACK OPERATIONS:
