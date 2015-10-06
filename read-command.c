@@ -85,7 +85,7 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char **w
     }
     int offset = i;
     for(i = offset; i < pos; i++){
-      output_word[i - offset] = parserOutput[i]; //get output 
+      output_word[i - offset] = parserOutput[i]; //get output
     }
     output_word[pos - offset] = '\0';
 
@@ -96,15 +96,15 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char **w
     strcpy(*word, result_word);
 
     return;
-    
-  } 
+
+  }
   if(hasOutput == -1 && hasInput != -1){//CASE 3: Input but no Output
     char result_word[pos];
     char input_word[pos];
     int i;
 
     for(i = 0; i<hasInput; i++){
-      result_word[i] = parserOutput[i]; //get result word 
+      result_word[i] = parserOutput[i]; //get result word
     }
 
     if(isspace(result_word[hasInput-1])){ //elim whitespace before < if there is one
@@ -123,20 +123,20 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char **w
     int offset = i;
 
     for(i = offset; i < pos; i++){
-      input_word[i - offset] = parserOutput[i]; //get output 
+      input_word[i - offset] = parserOutput[i]; //get output
     }
     input_word[pos - offset] = '\0';
 
     *input = (char *)malloc(sizeof(input_word));
     *word = (char *)malloc(sizeof(result_word));
-    *output = NULL; 
+    *output = NULL;
     strcpy(*word,result_word);
     strcpy(*input,input_word);
     return;
   }
   if(hasInput != -1 && hasOutput != -1){//CASE 4: has both I/O
-    //In test cases, Input always comes before Output, so I'm going to assume that's 
-    //the correct syntax. 
+    //In test cases, Input always comes before Output, so I'm going to assume that's
+    //the correct syntax.
     char result_word[pos];
     char input_word[pos];
     char output_word[pos];
@@ -160,7 +160,7 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char **w
     int offset = i;
 
     for(i = offset; i < hasOutput; i++){
-      input_word[i - offset] = parserOutput[i]; //get output 
+      input_word[i - offset] = parserOutput[i]; //get output
     }
 
     if(isspace(result_word[hasOutput-1])){ //elim whitespace before > if there is one
@@ -178,13 +178,13 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char **w
     }
     offset = i;
     for(i = offset; i < pos; i++){
-      output_word[i - offset] = parserOutput[i]; //get output 
+      output_word[i - offset] = parserOutput[i]; //get output
     }
     output_word[pos - offset] = '\0';
 
     *input = (char *)malloc(sizeof(input_word));
     *word = (char *)malloc(sizeof(result_word));
-    *output = (char *)malloc(sizeof(output_word)); 
+    *output = (char *)malloc(sizeof(output_word));
     strcpy(*word,result_word);
     strcpy(*input,input_word);
     strcpy(*output, output_word);
@@ -208,8 +208,8 @@ void combine_commands(command_t right,command_t left ,command_t result, char * o
   if(strncmp(op,"&&",2) == 0) result->type = AND_COMMAND;
   else if(strncmp(op,";",1) == 0) result->type = SEQUENCE_COMMAND;
   else if(strncmp(op,"||",2) == 0) result->type = OR_COMMAND;
-  else result->type = PIPE_COMMAND; 
-  
+  else result->type = PIPE_COMMAND;
+
   result->status = -1; //TODO: for part 1B ( dont worry for 1A)
   result->input = NULL;
   result->output = NULL;
@@ -249,7 +249,7 @@ void createSimpCommand(symbol_t &sym, int &len, int &maxLen, char *&data){
 	data[len] = '\0';
 	sym->simple_command = data;
 	createSymbol(sym, COMMAND_SYMBOL);
-	
+
 	int len = 0;
 	int maxLen = initialSize;
     char *data = malloc(initialSize * sizeof(char));
@@ -271,22 +271,22 @@ make_command_stream (int (*get_next_byte) (void *),
      add auxiliary functions and otherwise modify the source code.
      You can also use external functions defined in the GNU C Library.  */
 	char currentChar = get_next_byte(get_next_byte_argument);
-	
+
 	int commandLength = 0;
 	int allocLength = initialSize;
 	char *simpleCommand = malloc(initialSize * sizeof(char));
-	
+
 	int empty = 0; // Tracking whether the last simple command was empty.
 				   // 0 = empty, 1 = not empty
 	int skip = 0;  // Skips the character read at the end of each
 				   // iteration of while: ugly workaround to
 				   // distinguishing | and ||
-	
+
 	symbol_t currentSymbol = newSymbol();
 	symbol_t headSymbol = currentSymbol;
 	symbol_t tempSymbol;
 
-	while (current != EOF) { // Parsing
+	while (currentChar != EOF) { // Parsing
 		switch (current) {
 			case ';':
 				assert(empty == 1); // Assert that there is a non-null
@@ -304,7 +304,8 @@ make_command_stream (int (*get_next_byte) (void *),
 					// Check the next character. If it's also a pipe, we
 					// have an or operator. If it's anything else, it's
 					// just a pipe.
-				if (get_next_byte(get_next_byte_argument) == '|') {
+				currentChar = get_next_byte(get_next_byte_argument);
+				if (currentChar == '|') {
 					createSymbol(sym, OR_SYMBOL);
 				} else {
 					createSymbol(sym, PIPE_SYMBOL);
@@ -319,7 +320,6 @@ make_command_stream (int (*get_next_byte) (void *),
 					// If the & character isn't followed by another one,
 					// the operator is invalid.
 				createSymbol(sym, AND_SYMBOL);
-				
 				break;
 			case '(':
 				if (empty == 1) { // There does not necessarily need to
@@ -339,19 +339,25 @@ make_command_stream (int (*get_next_byte) (void *),
 				break;
 			case '#': // Advance to end of line. No break becase # is
 					  // an effective newline
-				while (current != '\n') {
+				while (currentChar != '\n') {
 					get_next_byte(get_next_byte_argument);
 				}
 			case '\n':
 				if (empty == 1) {
-				createSimpCommand(currentSym, commandLength,
-									allocLength, simpleCommand);
+				createSimpCommand(currentSym, commandLength, allocLength, simpleCommand);
 				}
-				currentSymbol->type = NEWLINE_SYMBOL;
-				tempSymbol = newSymbol();
-				currentSym->next = tempSymbol;
-				currentSym = tempSymbol;
-				
+
+				// Check the next byte. if it's also a newline, we have a new command.
+				currentChar = get_next_byte(get_next_byte_argument);
+				if (currentChar == '\n') {
+					createSymbol(NEWCOMMAND_SYMBOL);
+					while (currentChar == '\n') {
+						currentChar = get_next_byte(get_next_byte_argument);
+					}
+				} else { //otherwise, we just have a sequence command.
+					createSymbol(SEQUENCE_SYMBOL);
+				}
+				skip = 1;
 				break;
 			default: // Making the dangerous assumption that all other
 					 // characters are safe
@@ -372,7 +378,7 @@ make_command_stream (int (*get_next_byte) (void *),
 			skip = 0;
 		}
 	}
-		
+
 	//error (1, 0, "command reading not yet implemented");
 	//return 0;
 
@@ -382,41 +388,41 @@ make_command_stream (int (*get_next_byte) (void *),
      command_stream_t stream;
      commandStreamInit(stream);
 
-  /*TODO: Parser from left to right. Create command_node every time 
+  /*TODO: Parser from left to right. Create command_node every time
   There's a new command
   */
   // The output from this function I will denote as parserOutput for now
-  //  char * parserOutput; //TODO: 
+  //  char * parserOutput; //TODO:
   // Formerly parserOutput, now we use currentSymbol to denote the
   // current output node.
 	currentSymbol = headSymbol;
-	
+
   //INIT STACKS
     stack operatorStack;
     stack commandStack;
     newStack(&commandStack,sizeof(command_t));
-    newstack(&operatorStack,sizeof(char)* 3); //3 is the max length of a string for stuff like (&&\0) or (||\0)
-    while(/*!EOF from input*/)
+    newstack(&operatorStack,sizeof(char)* 3);  //3 is the max length of a string for stuff like (&&\0) or (||\0)
+    while(currentSymbol != NULL)
     {
       //a)If a simple command, push to a command stack
-      if(is_simple_command(parserOutput)){
+      if(currentSymbol->type = COMMAND_SYMBOL){
         command_t simpCommand;
-        constructSimpleCommand(simpCommand, parserOutput);
+        constructSimpleCommand(simpCommand, currentSymbol->simple_command);
         pushStack(&commandStack, simpCommand);
       }
 
       //b)If it is a "(", push it onto an operator-stack
-      if(strcmp(parserOutput,"(",1) == 0){
-        pushStack(&operatorStack, parserOutput);
-      }
-      
-      //c)If it is an Operator and operator stack is empty
-      //  1)push the operator onto the operator stack
-      if(isOperator(parserOutput) && StackisEmpty(&operatorStack)){
-        pushStack(&operatorStack, parserOutput);
+      if(strcmp(currentSymbol->simple_command,"(",1) == 0){
+        pushStack(&operatorStack, currentSymbol->simple_command);
       }
 
-     /* 
+      //c)If it is an Operator and operator stack is empty
+      //  1)push the operator onto the operator stack
+      if(currentSymbol->type != COMMAND_SYMBOL && StackisEmpty(&operatorStack)){
+        pushStack(&operatorStack, currentSymbol->simple_command);
+      }
+
+     /*
       d)If it is an operator and the operator stack is NOT empty
         1)Pop all operators with greator or equal precedence off the operator stack
           For each popped off Operator, Pop 2 commands  off command stack
@@ -424,16 +430,16 @@ make_command_stream (int (*get_next_byte) (void *),
         2)Stop when you reach an operator with lower precedence or a "("
         3)Push the operator onto the stack
       */
-      if(isOperator(parserOutput) && !StackisEmpty(&operatorStack)){
-        char * tempOp;
+      if(currentSymbol->type != COMMAND_SYMBOL && !StackisEmpty(&operatorStack)){
+        symbol_type tempOp;
         topStack(&operatorStack, tempOp);
-        while(!StackisEmpty(&operatorStack) && precedence(tempOp)>=precedence(parserOutput) && strcmp(tempOp,"(",1) != 0){
+        while(!StackisEmpty(&operatorStack) && precedence(tempOp)>=precedence(currentSymbol->type) && tempOp == LBRACKET_SYMBOL){
           combine_helper(&operatorStack, &commandStack, tempOp);
         }
-        pushStack(&operatorStack, parserOutput);
+        pushStack(&operatorStack, currentSymbol->type);
       }
-    
-     // e)If encounter ")", pop operators off the stack 
+
+     // e)If encounter ")", pop operators off the stack
     //(for each operator, pop two commands, combine, push back on command stack) 
     //until you find a matching "(". then create a subshell command by popping 
     //out 1 command from command stack.
