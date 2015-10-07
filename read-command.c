@@ -155,7 +155,7 @@ void commandStreamInit(command_stream_t stream){
 }
 
 // goes through an idetnified simple command and checks for input and output redirection and puts it inside the command
-void parseSimpCommand(char * parserOutput, char **input, char **output, char **word){
+void parseSimpCommand(char * parserOutput, char **input, char **output, char ***word){
   int pos = 0;
   int hasInput = -1; //represents the position of '<'
   int hasOutput = -1; //represents the position of '>'
@@ -167,8 +167,9 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char **w
   if(hasOutput == -1 && hasInput == -1){ //CASE 1: NO I/O REDIRECTION
     *input = NULL;
     *output = NULL; 
-    *word = (char *) malloc(sizeof(parserOutput));
-    strcpy(*word , parserOutput);
+    *word =(char **) malloc(sizeof(char *)); 
+    **word = malloc(sizeof(parserOutput));
+    strcpy(**word , parserOutput);
     return;
   }
 
@@ -198,26 +199,26 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char **w
     }
     int offset = i;
     for(i = offset; i < pos; i++){
-      output_word[i - offset] = parserOutput[i]; //get output
+      output_word[i - offset] = parserOutput[i]; //get output 
     }
     output_word[pos - offset] = '\0';
 
     *input = NULL;
-    *output = (char *) malloc(sizeof(output_word));
-    *word = (char *)malloc(sizeof(result_word));
-    strcpy(*output, output_word);
-    strcpy(*word, result_word);
+    *output = (char* )malloc(sizeof(output_word));
+    *word =(char **) malloc(sizeof(char *));
+    **word = malloc(sizeof(parserOutput));    strcpy(*output, output_word);
+    strcpy(**word, result_word);
 
     return;
-
-  }
+    
+  } 
   if(hasOutput == -1 && hasInput != -1){//CASE 3: Input but no Output
     char result_word[pos];
     char input_word[pos];
     int i;
 
     for(i = 0; i<hasInput; i++){
-      result_word[i] = parserOutput[i]; //get result word
+      result_word[i] = parserOutput[i]; //get result word 
     }
 
     if(isspace(result_word[hasInput-1])){ //elim whitespace before < if there is one
@@ -236,20 +237,21 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char **w
     int offset = i;
 
     for(i = offset; i < pos; i++){
-      input_word[i - offset] = parserOutput[i]; //get output
+      input_word[i - offset] = parserOutput[i]; //get output 
     }
     input_word[pos - offset] = '\0';
 
-    *input = (char *)malloc(sizeof(input_word));
-    *word = (char *)malloc(sizeof(result_word));
-    *output = NULL;
-    strcpy(*word,result_word);
+    *input = (char* )malloc(sizeof(input_word));
+    *word =(char **) malloc(sizeof(char *));
+    **word = malloc(sizeof(parserOutput));
+    *output = 0; 
+    strcpy(**word,result_word);
     strcpy(*input,input_word);
     return;
   }
   if(hasInput != -1 && hasOutput != -1){//CASE 4: has both I/O
-    //In test cases, Input always comes before Output, so I'm going to assume that's
-    //the correct syntax.
+    //In test cases, Input always comes before Output, so I'm going to assume that's 
+    //the correct syntax. 
     char result_word[pos];
     char input_word[pos];
     char output_word[pos];
@@ -273,7 +275,7 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char **w
     int offset = i;
 
     for(i = offset; i < hasOutput; i++){
-      input_word[i - offset] = parserOutput[i]; //get output
+      input_word[i - offset] = parserOutput[i]; //get output 
     }
 
     if(isspace(result_word[hasOutput-1])){ //elim whitespace before > if there is one
@@ -291,14 +293,15 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char **w
     }
     offset = i;
     for(i = offset; i < pos; i++){
-      output_word[i - offset] = parserOutput[i]; //get output
+      output_word[i - offset] = parserOutput[i]; //get output 
     }
     output_word[pos - offset] = '\0';
 
-    *input = (char *)malloc(sizeof(input_word));
-    *word = (char *)malloc(sizeof(result_word));
-    *output = (char *)malloc(sizeof(output_word));
-    strcpy(*word,result_word);
+    *input = (char* )malloc(sizeof(input_word));
+    *word =(char **) malloc(sizeof(char *));
+    **word = malloc(sizeof(parserOutput));    
+    *output = (char* )malloc(sizeof(output_word)); 
+    strcpy(**word,result_word);
     strcpy(*input,input_word);
     strcpy(*output, output_word);
     return;
@@ -311,7 +314,7 @@ void constructSimpleCommand(command_t com, char * parserOutput){
   com = (command_t) malloc(sizeof(struct command));
   com->type = SIMPLE_COMMAND; 
   com->status =  -1; //TODO: EDIT THIS IN LAB 1B
-  parseSimpCommand(parserOutput, &(com->input), &(com->output), com->u.word);/*TODO: Need to check this*/
+  parseSimpCommand(parserOutput, &(com->input), &(com->output), &(com->u.word));/*TODO: Need to check this*/
 }
 
 //combines two commands into result

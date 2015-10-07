@@ -3,7 +3,7 @@
 #include <ctype.h>
 #include <string.h>
 //TODO: when you finish this, rememeber to COPY THIS OVER TO read-command.c!!
-void parseSimpCommand(char * parserOutput, char **input, char **output, char **word){
+void parseSimpCommand(char * parserOutput, char **input, char **output, char ***word){
   int pos = 0;
   int hasInput = -1; //represents the position of '<'
   int hasOutput = -1; //represents the position of '>'
@@ -15,8 +15,9 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char **w
   if(hasOutput == -1 && hasInput == -1){ //CASE 1: NO I/O REDIRECTION
     *input = NULL;
     *output = NULL; 
-    *word =(char *) malloc(sizeof(parserOutput));
-    strcpy(*word , parserOutput);
+    *word =(char **) malloc(sizeof(char *)); 
+    **word = malloc(sizeof(parserOutput));
+    strcpy(**word , parserOutput);
     return;
   }
 
@@ -52,9 +53,9 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char **w
 
     *input = NULL;
     *output = (char* )malloc(sizeof(output_word));
-    *word = (char* )malloc(sizeof(result_word));
-    strcpy(*output, output_word);
-    strcpy(*word, result_word);
+    *word =(char **) malloc(sizeof(char *));
+    **word = malloc(sizeof(parserOutput));    strcpy(*output, output_word);
+    strcpy(**word, result_word);
 
     return;
     
@@ -89,9 +90,10 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char **w
     input_word[pos - offset] = '\0';
 
     *input = (char* )malloc(sizeof(input_word));
-    *word = (char* )malloc(sizeof(result_word));
+    *word =(char **) malloc(sizeof(char *));
+    **word = malloc(sizeof(parserOutput));
     *output = 0; 
-    strcpy(*word,result_word);
+    strcpy(**word,result_word);
     strcpy(*input,input_word);
     return;
   }
@@ -144,9 +146,10 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char **w
     output_word[pos - offset] = '\0';
 
     *input = (char* )malloc(sizeof(input_word));
-    *word = (char* )malloc(sizeof(result_word));
+    *word =(char **) malloc(sizeof(char *));
+    **word = malloc(sizeof(parserOutput));    
     *output = (char* )malloc(sizeof(output_word)); 
-    strcpy(*word,result_word);
+    strcpy(**word,result_word);
     strcpy(*input,input_word);
     strcpy(*output, output_word);
     return;
@@ -155,11 +158,11 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char **w
 }
 
 int main(int argc, char **argv){
-  char parserOutput[] = "a xb>dc"; 
-  char *input; char *output; char *word;
+  char parserOutput[] = "adc"; 
+  char *input; char *output; char **word;
   parseSimpCommand(parserOutput, &input, &output, &word);
   if(input)  printf("%s\n", input);
-  if(word) printf("%s\n", word);
+  if(word) printf("%s\n", *word);
   if(output) printf("%s\n", output);
 }
 
