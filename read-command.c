@@ -523,9 +523,7 @@ make_command_stream (int (*get_next_byte) (void *),
 
     newStack(&commandStack,sizeof(command_t));
     newStack(&operatorStack,sizeof(symbol_type)); //enums symbols are ints
-    while(currentSymbol != NULL)
-    {
-
+    while(currentSymbol != NULL) {
       if(currentSymbol->type == NEWCOMMAND_SYMBOL){
           //create a new command node, hoook the last one to the tail  of the stream
           command_t temp = (command_t) malloc(sizeof(struct command));
