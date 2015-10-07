@@ -366,18 +366,19 @@ void createSymbol(symbol_t *sym, symbol_type type) {
 
 //Helper for turning simple commands into tokens
 //Pointer bug, fix later.
-void createSimpCommand(symbol_t *sym, int *len, int *maxLen, char *data){
+void createSimpCommand(symbol_t *sym, int *len, int *maxLen, char **data, int *empty){
 	if (*len == *maxLen) {
 		*maxLen += 1;
-		data = (char*)realloc(data, (*maxLen)*sizeof(char));
+		*data = (char*)realloc(*data, (*maxLen)*sizeof(char));
 	}
-	data[*len] = '\0';
-	(*sym)->simple_command = data;
+	(*data)[*len] = '\0';
+	(*sym)->simple_command = *data;
 	createSymbol(sym, COMMAND_SYMBOL);
 
 	*len = 0;
 	*maxLen = initialSize;
-	data = (char*)malloc(initialSize * sizeof(char));
+	*data = (char*)malloc(initialSize * sizeof(char));
+	*empty = 0;
 }
 
 command_stream_t
@@ -391,7 +392,7 @@ make_command_stream (int (*get_next_byte) (void *),
 
 	int commandLength = 0;
 	int allocLength = initialSize;
-	char *simpleCommand = malloc(initialSize * sizeof(char));
+	char *simpleCommand = (char*)malloc(initialSize * sizeof(char));
 	int empty = 0; // Tracking whether the last simple command was empty.
 				   // 0 = empty, 1 = not empty
 	int skip = 0;  // Skips the character read at the end of each
@@ -402,18 +403,18 @@ make_command_stream (int (*get_next_byte) (void *),
 	symbol_t headSymbol = currentSymbol;
 	symbol_t tempSymbol;
 	while (currentChar != EOF) { // Parsing
-		switch (currentChar) {
+	switch (currentChar) {
 			case ';':
 				assert(empty == 1); // Assert that there is a non-null
 									// command prior, or the operation is
 									// invalid.
-				createSimpCommand(&currentSymbol, &commandLength, &allocLength, simpleCommand);
+				createSimpCommand(&currentSymbol, &commandLength, &allocLength, &simpleCommand, &empty);
 				currentSymbol->type = SEQUENCE_SYMBOL;
 				createSymbol(&currentSymbol, SEQUENCE_SYMBOL);
 				break;
 			case '|':
 				assert(empty == 1);
-				createSimpCommand(&currentSymbol, &commandLength, &allocLength, simpleCommand);
+				createSimpCommand(&currentSymbol, &commandLength, &allocLength, &simpleCommand, &empty);
 					// Check the next character. If it's also a pipe, we
 					// have an or operator. If it's anything else, it's
 					// just a pipe.
@@ -427,7 +428,7 @@ make_command_stream (int (*get_next_byte) (void *),
 				break;
 			case '&':
 				assert(empty == 1);
-				createSimpCommand(&currentSymbol, &commandLength, &allocLength, simpleCommand);
+				createSimpCommand(&currentSymbol, &commandLength, &allocLength, &simpleCommand, &empty);
 				assert (get_next_byte(get_next_byte_argument) == '&');
 					// If the & character isn't followed by another one,
 					// the operator is invalid.
@@ -436,14 +437,14 @@ make_command_stream (int (*get_next_byte) (void *),
 			case '(':
 				if (empty == 1) { // There does not necessarily need to
 								  // be a simple command before a '('
-				createSimpCommand(&currentSymbol, &commandLength, &allocLength, simpleCommand);
+				createSimpCommand(&currentSymbol, &commandLength, &allocLength, &simpleCommand, &empty);
 				}
 
 				createSymbol(&currentSymbol, LBRACKET_SYMBOL);
 				break;
 			case ')':
 				assert(empty == 1);
-				createSimpCommand(&currentSymbol, &commandLength, &allocLength, simpleCommand);
+				createSimpCommand(&currentSymbol, &commandLength, &allocLength, &simpleCommand, &empty);
 				createSymbol(&currentSymbol, RBRACKET_SYMBOL);
 				break;
 			case '#': // Advance to end of line. No break becase # is
@@ -453,20 +454,26 @@ make_command_stream (int (*get_next_byte) (void *),
 				}
 			case '\n':
 				if (empty == 1) {
-				createSimpCommand(&currentSymbol, &commandLength, &allocLength, simpleCommand);
-				}
-
-				// Check the next byte. if it's also a newline, we have a new command.
-				currentChar = get_next_byte(get_next_byte_argument);
-				if (currentChar == '\n') {
-					createSymbol(&currentSymbol, NEWCOMMAND_SYMBOL);
-					while (currentChar == '\n') {
-						currentChar = get_next_byte(get_next_byte_argument);
+					createSimpCommand(&currentSymbol, &commandLength, &allocLength, &simpleCommand, &empty);
+					// Check the next byte. if it's also a newline, we have a new command.
+					currentChar = get_next_byte(get_next_byte_argument);
+					if (currentChar == '\n' || currentChar == '#') {
+						createSymbol(&currentSymbol, NEWCOMMAND_SYMBOL);
+						while (currentChar == '\n') {
+							currentChar = get_next_byte(get_next_byte_argument);
+							if (currentChar =='#') {
+								while (currentChar != '\n') {
+									currentChar = get_next_byte(get_next_byte_argument);
+								}
+							}
+						}
+					} else if (currentChar == EOF) {
+						break;
+					} else { //otherwise, we just have a sequence command.
+						createSymbol(&currentSymbol, SEQUENCE_SYMBOL);
 					}
-				} else { //otherwise, we just have a sequence command.
-					createSymbol(&currentSymbol, SEQUENCE_SYMBOL);
+					skip = 1;
 				}
-				skip = 1;
 				break;
 			default: // Making the dangerous assumption that all other
 					 // characters are safe
@@ -505,38 +512,7 @@ make_command_stream (int (*get_next_byte) (void *),
   // Formerly parserOutput, now we use currentSymbol to denote the
   // current output node.
 	currentSymbol = headSymbol;
-	while (currentSymbol != NULL) {
-		switch(currentSymbol->type) {
-			case COMMAND_SYMBOL:
-				printf(currentSymbol->simple_command);
-				break;
-			case OR_SYMBOL:
-				printf("||");
-				break;
-			case AND_SYMBOL:
-				printf("&&");
-				break;
-			case PIPE_SYMBOL:
-				printf("|");
-				break;
-			case LBRACKET_SYMBOL:
-				printf("(");
-				break;
-			case RBRACKET_SYMBOL:
-				printf(")");
-				break;
-			case SEQUENCE_SYMBOL:
-				printf(";");
-				break;
-			case NEWCOMMAND_SYMBOL:
-				printf("\n");
-				break;
-			default:
-				break;
-		}
 
-		currentSymbol = currentSymbol->next;
-	}
   //INIT STACKS
     stack operatorStack;
     stack commandStack;
