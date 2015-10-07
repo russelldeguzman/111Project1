@@ -539,7 +539,6 @@ make_command_stream (int (*get_next_byte) (void *),
   //INIT STACKS
     stack operatorStack;
     stack commandStack;
-    command_t currCommand = (command_t) malloc(sizeof(struct command));
     command_node_t currCommandNode = (command_node_t) malloc(sizeof(struct command_node));// init first command node
     stream->head = currCommandNode;
     stream->tail = currCommandNode; //attach to the stream
@@ -548,16 +547,21 @@ make_command_stream (int (*get_next_byte) (void *),
     newStack(&operatorStack,sizeof(symbol_type)); //enums symbols are ints
     while(currentSymbol != NULL)
     {
-
       if(currentSymbol->type == NEWCOMMAND_SYMBOL){
           //create a new command node, hoook the last one to the tail  of the stream
+      	  struct command currCommand;
+      	  popStack(&commandStack, &currCommand);
           command_t temp = (command_t) malloc(sizeof(struct command));
           command_node_t tempCommandNode = (command_node_t)malloc(sizeof(struct command_node));
           stream->tail->next = currCommandNode;
-          currCommandNode->root = *currCommand;
+          currCommandNode->root = &currCommand;
           currCommandNode->next = NULL;
-          currCommand = temp;
 	  	  currCommandNode = tempCommandNode;
+	  	  destroyStack(&operatorStack);
+	  	  destroyStack(&commandStack);
+	  	  newStack(&commandStack,sizeof(struct command));
+    	  newStack(&operatorStack,sizeof(symbol_type)); //enums symbols are ints
+
       }
       //check if this symbol is a newline and the next symbol is a newline
 
