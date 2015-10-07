@@ -34,10 +34,3 @@ struct command
     struct command *subshell_command;
   } u;
 };
-
-//Command Node
-struct command_node
-{
-  struct command_t root;
-  struct command_node_t next;
-};

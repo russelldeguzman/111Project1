@@ -1,0 +1,32 @@
+read-command.c: In function ‘make_command_stream’:
+read-command.c:605:21: warning: assignment from incompatible pointer type
+     currCommandNode = rootNode;
+                     ^
+read-command.c: In function ‘newSymbol’:
+read-command.c:64:22: warning: ‘new’ is used uninitialized in this function [-Wuninitialized]
+  new->simple_command = NULL;
+                      ^
+read-command.c: In function ‘combine_helper’:
+read-command.c:342:4: warning: ‘l’ is used uninitialized in this function [-Wuninitialized]
+    popStack(cmdStack, l);
+    ^
+read-command.c:343:4: warning: ‘r’ is used uninitialized in this function [-Wuninitialized]
+    popStack(cmdStack, r);
+    ^
+read-command.c: In function ‘make_command_stream’:
+read-command.c:500:6: warning: ‘stream’ may be used uninitialized in this function [-Wmaybe-uninitialized]
+      commandStreamInit(stream);
+      ^
+read-command.c:539:9: warning: ‘simpCommand’ may be used uninitialized in this function [-Wmaybe-uninitialized]
+         constructSimpleCommand(simpCommand, currentSymbol->simple_command);
+         ^
+read-command.c:583:9: warning: ‘topCommand’ may be used uninitialized in this function [-Wmaybe-uninitialized]
+         popStack(&commandStack, topCommand);
+         ^
+read-command.c:585:9: warning: ‘subshellCommand’ may be used uninitialized in this function [-Wmaybe-uninitialized]
+         createSubshell(topCommand, subshellCommand);
+         ^
+read-command.c:602:5: warning: ‘rootNode’ may be used uninitialized in this function [-Wmaybe-uninitialized]
+     popStack(&commandStack, rootNode); 
+     ^
+make: *** [test-p-ok] Error 139
