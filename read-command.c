@@ -319,6 +319,7 @@ void constructSimpleCommand(command_t com, char * parserOutput){
 
 //combines two commands into result
 void combine_commands(command_t right,command_t left ,command_t result, symbol_type op){
+  
   if(op == AND_SYMBOL) result->type = AND_COMMAND;
   else if(op ==SEQUENCE_SYMBOL) result->type = SEQUENCE_COMMAND;
   else if(op == OR_SYMBOL) result->type = OR_COMMAND;
@@ -545,7 +546,7 @@ make_command_stream (int (*get_next_byte) (void *),
     stream->tail = currCommandNode; //attach to the stream
 
     newStack(&commandStack,sizeof(command_t));
-    newStack(&operatorStack,sizeof(int)); //enums symbols are ints
+    newStack(&operatorStack,sizeof(symbol_type)); //enums symbols are ints
     while(currentSymbol != NULL)
     {
 
@@ -590,7 +591,7 @@ make_command_stream (int (*get_next_byte) (void *),
       if(currentSymbol->type != COMMAND_SYMBOL && !StackisEmpty(&operatorStack)){
         symbol_type tempOp;
         topStack(&operatorStack, &tempOp);
-        while(!StackisEmpty(&operatorStack) && precedence(tempOp)>=precedence(currentSymbol->type) && tempOp == LBRACKET_SYMBOL){
+        while(!StackisEmpty(&operatorStack) && precedence(tempOp)>=precedence(currentSymbol->type) && tempOp != LBRACKET_SYMBOL){
           combine_helper(&operatorStack, &commandStack, &tempOp);
         }
         pushStack(&operatorStack, &(currentSymbol->type));
@@ -603,7 +604,7 @@ make_command_stream (int (*get_next_byte) (void *),
       if(currentSymbol->type == RBRACKET_SYMBOL){
         symbol_type tempOp;
         topStack(&operatorStack, &tempOp);
-        while(!StackisEmpty(&operatorStack) && currentSymbol->type != LBRACKET_SYMBOL){
+        while(!StackisEmpty(&operatorStack) && tempOp != LBRACKET_SYMBOL){
           combine_helper(&operatorStack,&commandStack,&tempOp);
         }
         command_t subshellCommand = NULL;
@@ -636,7 +637,6 @@ make_command_stream (int (*get_next_byte) (void *),
     stream->tail->next = currCommandNode; //ATTACHES THE LAST COMMAND
     currCommandNode->next = NULL; //MARKS THE END
     
-
     //return Command_stream linked list
     return stream;
 }
