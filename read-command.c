@@ -167,7 +167,10 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char ***
   if(hasOutput == -1 && hasInput == -1){ //CASE 1: NO I/O REDIRECTION
     *input = NULL;
     *output = NULL; 
-    *word =(char **) malloc(sizeof(char *)); 
+    *word =(char **) malloc(2 * sizeof(char *)); 
+    (*word)[1] = NULL;
+    printf("d\n");
+
     **word = malloc(sizeof(parserOutput));
     strcpy(**word , parserOutput);
     return;
@@ -205,8 +208,10 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char ***
 
     *input = NULL;
     *output = (char* )malloc(sizeof(output_word));
-    *word =(char **) malloc(sizeof(char *));
-    **word = malloc(sizeof(parserOutput));    strcpy(*output, output_word);
+    *word =(char **) malloc(2 * sizeof(char *));
+    (*word)[1] = NULL;
+    **word = malloc(sizeof(parserOutput));    
+    strcpy(*output, output_word);
     strcpy(**word, result_word);
 
     return;
@@ -242,7 +247,8 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char ***
     input_word[pos - offset] = '\0';
 
     *input = (char* )malloc(sizeof(input_word));
-    *word =(char **) malloc(sizeof(char *));
+    *word =(char **) malloc(2 * sizeof(char *));
+    (*word)[1] = NULL;
     **word = malloc(sizeof(parserOutput));
     *output = 0; 
     strcpy(**word,result_word);
@@ -299,7 +305,8 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char ***
 
     *input = (char* )malloc(sizeof(input_word));
     *word =(char **) malloc(sizeof(char *));
-    **word = malloc(sizeof(parserOutput));    
+    **word = malloc(2 * sizeof(parserOutput));
+    (*word)[1] = NULL;    
     *output = (char* )malloc(sizeof(output_word)); 
     strcpy(**word,result_word);
     strcpy(*input,input_word);
@@ -308,6 +315,7 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char ***
   }
   printf("No events triggered! Error!\n");
 }
+
 
 //breaks up the simple command from the parser and constructs command
 void constructSimpleCommand(command_t com, char * parserOutput){
