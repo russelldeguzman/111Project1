@@ -1,7 +1,7 @@
 # CS 111 Lab 1 Makefile
 
 CC = gcc
-CFLAGS = -g -Wall -Wextra -Wno-unused -Werror
+CFLAGS = -g -Wall -Wextra -Wno-unused # -Werror
 LAB = 1
 DISTDIR = lab1-$(USER)
 
@@ -28,7 +28,6 @@ timetrash: $(TIMETRASH_OBJECTS)
 alloc.o: alloc.h
 execute-command.o main.o print-command.o read-command.o: command.h
 execute-command.o print-command.o read-command.o: command-internals.h
-read-command.o: symbol.h
 
 dist: $(DISTDIR).tar.gz
 
