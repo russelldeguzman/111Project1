@@ -95,7 +95,9 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char ***
 
     *input = NULL;
     *output = (char* )malloc(sizeof(output_word));
-    strcpy(*output, output_word);
+    char *outTok;
+    outTok=strtok(output_word,s);
+    strcpy(*output, outTok);
     return;
     
   } 
@@ -141,8 +143,10 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char ***
        token = strtok(NULL, s);
     }
     *input = (char* )malloc(sizeof(input_word));
+    char *inTok;
+    inTok=strtok(input_word,s);
     *output = 0; 
-    strcpy(*input,input_word);
+    strcpy(*input,inTok);
     return;
   }
   if(hasInput != -1 && hasOutput != -1){//CASE 4: has both I/O
@@ -208,24 +212,28 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char ***
     }
 
     *input = (char* )malloc(sizeof(input_word));
-    *output = (char* )malloc(sizeof(output_word)); 
-    strcpy(*input,input_word);
-    strcpy(*output, output_word);
+    *output = (char* )malloc(sizeof(output_word));
+    char *outTok;
+    outTok=strtok(output_word,s); 
+    char *inTok;
+    inTok=strtok(input_word,s);
+    strcpy(*input,inTok);
+    strcpy(*output, outTok);
     return;
   }
   printf("No events triggered! Error!\n");
 }
 
 int main(int argc, char **argv){
-  char parserOutput[] = "fuck you fads  fasd< gg d fasd > gg g s "; 
+  char parserOutput[] = "YOU'RE AMAZING > RUSSELL  "; 
   char *input; char *output; char **word;
   parseSimpCommand(parserOutput, &input, &output, &word);
-  //if(input)  printf("%s\n", input);
+  if(input)  printf("%s\n", input);
   printf("%s\n", *word);
   while(*++word){
     printf("%s\n", *word);
   }
 
-  //if(output) printf("%s\n", output);
+  if(output) printf("%s\n", output);
 }
 

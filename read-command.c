@@ -257,7 +257,9 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char ***
 
     *input = NULL;
     *output = (char* )malloc(sizeof(output_word));
-    strcpy(*output, output_word);
+    char *outTok;
+    outTok=strtok(output_word,s);
+    strcpy(*output, outTok);
     return;
     
   } 
@@ -303,8 +305,10 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char ***
        token = strtok(NULL, s);
     }
     *input = (char* )malloc(sizeof(input_word));
+    char *inTok;
+    inTok=strtok(input_word,s);
     *output = 0; 
-    strcpy(*input,input_word);
+    strcpy(*input,inTok);
     return;
   }
   if(hasInput != -1 && hasOutput != -1){//CASE 4: has both I/O
@@ -370,9 +374,13 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char ***
     }
 
     *input = (char* )malloc(sizeof(input_word));
-    *output = (char* )malloc(sizeof(output_word)); 
-    strcpy(*input,input_word);
-    strcpy(*output, output_word);
+    *output = (char* )malloc(sizeof(output_word));
+    char *outTok;
+    outTok=strtok(output_word,s); 
+    char *inTok;
+    inTok=strtok(input_word,s);
+    strcpy(*input,inTok);
+    strcpy(*output, outTok);
     return;
   }
   printf("No events triggered! Error!\n");
