@@ -165,7 +165,7 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char ***
 }
 
 int main(int argc, char **argv){
-  char parserOutput[] = " g <adc "; 
+  char parserOutput[] = "a b<c > d"; 
   char *input; char *output; char **word;
   parseSimpCommand(parserOutput, &input, &output, &word);
   if(input)  printf("%s\n", input);
