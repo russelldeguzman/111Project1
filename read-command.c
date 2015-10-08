@@ -187,12 +187,21 @@ int countwrds(char * arr){
 void parseSimpCommand(char * parserOutput, char **input, char **output, char ***word){
   int pos = 0;
   int hasInput = -1; //represents the position of '<'
+  int inputCount = 0;
   int hasOutput = -1; //represents the position of '>'
+  int outputCount = 0;
   while(parserOutput[pos] != '\0'){ //TODO: remember to end strings with '\0'
-    if(parserOutput[pos] == '<') hasInput = pos; 
-    if(parserOutput[pos] == '>') hasOutput = pos; 
+    if(parserOutput[pos] == '<'){
+	 hasInput = pos; 
+	inputCount++;
+	}
+    if(parserOutput[pos] == '>'){
+	 hasOutput = pos; 
+	outputCount++; 
+	}
     pos = pos + 1;
   }
+  if(inputCount > 1 || outputCount > 1) error(1, 0, "Too many I/O symbols"); 
   if(hasOutput == -1 && hasInput == -1){ //CASE 1: NO I/O REDIRECTION
     *input = NULL;
     *output = NULL;
@@ -291,7 +300,7 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char ***
       input_word[i - offset] = parserOutput[i]; //get output 
     }
     input_word[pos - offset] = '\0';
-
+    if(countwrds(result_word) == 0) error(1, 0, "No words used"); 
     int rSize = countwrds(result_word) + 1; //calc num of words in the string
     *word =(char **) malloc(rSize * sizeof(char *));
     (*word)[rSize-1] = NULL;
@@ -379,6 +388,7 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char ***
     outTok=strtok(output_word,s); 
     char *inTok;
     inTok=strtok(input_word,s);
+    if(hasOutput < hasInput) error(1, 0, "This Shouldn't Work");
     strcpy(*input,inTok);
     strcpy(*output, outTok);
     return;
@@ -555,6 +565,9 @@ make_command_stream (int (*get_next_byte) (void *),
 					skip = 1;
 				}
 				break;
+			case '`':
+				error(1, 0, "got a `");
+				break;
 			default: // Making the dangerous assumption that all other
 					 // characters are safe
 				if (empty == 0 && currentChar != ' ') {
@@ -605,7 +618,7 @@ make_command_stream (int (*get_next_byte) (void *),
     newStack(&operatorStack,sizeof(symbol_type)); //enums symbols are ints
     while(!(currentSymbol->type == COMMAND_SYMBOL && currentSymbol->simple_command == NULL) /*currentSymbol != NULL*/) {	
       if(currentSymbol->type == NEWCOMMAND_SYMBOL){
-        //create a new command node, hoook the last one to the tail  of the stream
+        //create a new command node, hook the last one to the tail  of the stream
 
 	if(!StackisEmpty(&operatorStack)){//g)When all words are gone, pop each operator and 
 		//combine them with 2 commands similar to d)
@@ -689,22 +702,28 @@ make_command_stream (int (*get_next_byte) (void *),
     
     //g)When all words are gone, pop each operator and 
     //combine them with 2 commands similar to d)
-    symbol_type * tempOp = (symbol_type *)malloc(sizeof(symbol_type));
-    topStack(&operatorStack, tempOp);
-    while(!StackisEmpty(&operatorStack)){
-        combine_helper(&operatorStack,&commandStack,tempOp);
+    if (!StackisEmpty(&operatorStack)) {
+       symbol_type * tempOp = (symbol_type *)malloc(sizeof(symbol_type));
+       topStack(&operatorStack, tempOp);
+       while(!StackisEmpty(&operatorStack)){
+           combine_helper(&operatorStack,&commandStack,tempOp);
+       }
     }
     
-    //rootNode is now ready to add to the tree.
-    command_t rootNode = (command_t)malloc(sizeof(struct command));;
+    if(!StackisEmpty(&commandStack)) {
+       //rootNode is now ready to add to the tree.
+       command_t rootNode = (command_t)malloc(sizeof(struct command));;
 
-    popStack(&commandStack, rootNode); 
-    //TODO: add the rootNode to a command_Node
-    currCommandNode->root = rootNode;
-    //TODO: add the command_Node to the linked list
-    stream->tail->next = currCommandNode; //ATTACHES THE LAST COMMAND
-    currCommandNode->next = NULL; //MARKS THE END
-    stream->tail=currCommandNode;
+       popStack(&commandStack, rootNode); 
+       //TODO: add the rootNode to a command_Node
+       currCommandNode->root = rootNode;
+       //TODO: add the command_Node to the linked list
+       stream->tail->next = currCommandNode; //ATTACHES THE LAST COMMAND
+       currCommandNode->next = NULL; //MARKS THE END
+    
+       stream->tail=currCommandNode;
+    }
+    stream->tail->next = NULL;
     //return Command_stream linked list
     return stream;
 }
