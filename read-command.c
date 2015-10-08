@@ -20,131 +20,131 @@ typedef struct symbol *symbol_t;
 typedef struct symbol_header *symbol_header_t;
 
 typedef enum {
-	COMMAND_SYMBOL,		// Regular commands
-	OR_SYMBOL,		// ||
-	AND_SYMBOL,		// &&
-	PIPE_SYMBOL,		// |
-	LBRACKET_SYMBOL,	// (
-	RBRACKET_SYMBOL,	// )
-	SEQUENCE_SYMBOL,	// ;
-	NEWCOMMAND_SYMBOL	// \n
+  COMMAND_SYMBOL,   // Regular commands
+  OR_SYMBOL,    // ||
+  AND_SYMBOL,   // &&
+  PIPE_SYMBOL,    // |
+  LBRACKET_SYMBOL,  // (
+  RBRACKET_SYMBOL,  // )
+  SEQUENCE_SYMBOL,  // ;
+  NEWCOMMAND_SYMBOL // \n
 } symbol_type;
 
 struct symbol {
-	symbol_type type;
-	char *simple_command;
-	struct symbol *next;
+  symbol_type type;
+  char *simple_command;
+  struct symbol *next;
 };
 
 typedef struct {
-	void *data; //data pointer
-	int dataSize; //the size of the particular data (e.g. sizeof(int))
-	int length; //number of elements in the container
-	int allocLength; //the length of memory reserved for this container 
+  void *data; //data pointer
+  int dataSize; //the size of the particular data (e.g. sizeof(int))
+  int length; //number of elements in the container
+  int allocLength; //the length of memory reserved for this container 
 } stack;
 
   //Command Node
 struct command_node {
-	command_t root;
-	command_node_t next;
+  command_t root;
+  command_node_t next;
 };
 
 struct command_stream{
-	command_node_t head;
-	command_node_t tail;
+  command_node_t head;
+  command_node_t tail;
 };
 
 symbol_t newSymbol() {
-	struct symbol *new = (struct symbol*)malloc(sizeof(struct symbol));
-	new->simple_command = NULL;
-	new->next = NULL;
-	return new;
+  struct symbol *new = (struct symbol*)malloc(sizeof(struct symbol));
+  new->simple_command = NULL;
+  new->next = NULL;
+  return new;
 }
 
 int precedence(symbol_type op){
-	if(op == SEQUENCE_SYMBOL){
-		return 1;
-	}
-	else if(op == OR_SYMBOL || op == AND_SYMBOL){
-		return 2;
-	}
-	else if(op == PIPE_SYMBOL){
-		return 3;
-	}
-	else{
-		printf("Error! %d\n", op);
-		return -1;
-	}
+  if(op == SEQUENCE_SYMBOL){
+    return 1;
+  }
+  else if(op == OR_SYMBOL || op == AND_SYMBOL){
+    return 2;
+  }
+  else if(op == PIPE_SYMBOL){
+    return 3;
+  }
+  else{
+    printf("Error! %d\n", op);
+    return -1;
+  }
 }
 
 //command_node initalize
 void node_init(command_node_t n, command_t command){
-	n->root=command;
-	n->next=NULL;
+  n->root=command;
+  n->next=NULL;
 }
 //get tail of list
 command_node_t getTail(command_node_t head){
-	command_node_t tail=head;
-	while(tail->next != NULL) tail=tail->next;
-	return tail;
+  command_node_t tail=head;
+  while(tail->next != NULL) tail=tail->next;
+  return tail;
 }
 
 //add to list 
 void append(command_node_t tail, command_node_t newNode){
-	tail->next=newNode;
-	newNode->next=NULL;
-	tail=tail->next;	
+  tail->next=newNode;
+  newNode->next=NULL;
+  tail=tail->next;  
 }
 
 void newStack(stack *st, int dataSize){
-	assert(dataSize > 0);
-	st->dataSize = dataSize;
-	st->length = 0;
-	st->allocLength = initialSize;
-	st->data = malloc(initialSize * dataSize);
-	assert(st->data != NULL);
+  assert(dataSize > 0);
+  st->dataSize = dataSize;
+  st->length = 0;
+  st->allocLength = initialSize;
+  st->data = malloc(initialSize * dataSize);
+  assert(st->data != NULL);
 } 
 
 //free stack
 void destroyStack(stack *st){
-	free(st->data);
+  free(st->data);
 } 
 
 //isempty
 bool StackisEmpty(const stack *st){
-	if(st->length == 0) return true;
-	return false;
+  if(st->length == 0) return true;
+  return false;
 } 
 
  //push
 void pushStack(stack *st, const void* add){
-	void *destination;
-	if(st->length == st->allocLength){
-		st->allocLength *= 2;
-		st->data = realloc(st->data, st->allocLength * st->dataSize);
-		assert(st->data != NULL);
-	}
+  void *destination;
+  if(st->length == st->allocLength){
+    st->allocLength *= 2;
+    st->data = realloc(st->data, st->allocLength * st->dataSize);
+    assert(st->data != NULL);
+  }
 
-	destination = (char *)st->data + st->length * st->dataSize;
-	memcpy(destination,add,st->dataSize);
-	st->length++;
+  destination = (char *)st->data + st->length * st->dataSize;
+  memcpy(destination,add,st->dataSize);
+  st->length++;
 }
 
 //pop
 void popStack(stack *st, void* top){
-	const void *src;
-	assert(!StackisEmpty(st));
-	st->length--;
-	src = (const char *) st->data + st->length * st->dataSize;
-	memcpy(top, src, st->dataSize);
+  const void *src;
+  assert(!StackisEmpty(st));
+  st->length--;
+  src = (const char *) st->data + st->length * st->dataSize;
+  memcpy(top, src, st->dataSize);
 }
 
 //view top element (doesnt affect stack)
 void topStack(stack *st, void* top){
-	const void *src;
-	assert(!StackisEmpty(st));
-	src = (const char *) st->data + (st->length - 1) * st->dataSize;
-	memcpy(top, src, st->dataSize);
+  const void *src;
+  assert(!StackisEmpty(st));
+  src = (const char *) st->data + (st->length - 1) * st->dataSize;
+  memcpy(top, src, st->dataSize);
 }
 
 /* FIXME: Define the type 'struct command_stream' here.  This should
@@ -156,11 +156,11 @@ void commandStreamInit(command_stream_t stream){
 
 // 0 is false, 1 is true.
 int isOperator(symbol_type t) {
-	if (t == SEQUENCE_SYMBOL || t == AND_SYMBOL || t == OR_SYMBOL || t == PIPE_SYMBOL) {
-		return 1;
-	} else {
-		return 0;
-	}
+  if (t == SEQUENCE_SYMBOL || t == AND_SYMBOL || t == OR_SYMBOL || t == PIPE_SYMBOL) {
+    return 1;
+  } else {
+    return 0;
+  }
 }
 
 // goes through an idetnified simple command and checks for input and output redirection and puts it inside the command
@@ -187,12 +187,21 @@ int countwrds(char * arr){
 void parseSimpCommand(char * parserOutput, char **input, char **output, char ***word){
   int pos = 0;
   int hasInput = -1; //represents the position of '<'
+  int inputCount = 0;
   int hasOutput = -1; //represents the position of '>'
+  int outputCount = 0;
   while(parserOutput[pos] != '\0'){ //TODO: remember to end strings with '\0'
-    if(parserOutput[pos] == '<') hasInput = pos; 
-    if(parserOutput[pos] == '>') hasOutput = pos; 
+    if(parserOutput[pos] == '<'){
+   hasInput = pos; 
+  inputCount++;
+  }
+    if(parserOutput[pos] == '>'){
+   hasOutput = pos; 
+  outputCount++; 
+  }
     pos = pos + 1;
   }
+  if(inputCount > 1 || outputCount > 1) error(1, 0, "Too many I/O symbols"); 
   if(hasOutput == -1 && hasInput == -1){ //CASE 1: NO I/O REDIRECTION
     *input = NULL;
     *output = NULL;
@@ -291,7 +300,7 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char ***
       input_word[i - offset] = parserOutput[i]; //get output 
     }
     input_word[pos - offset] = '\0';
-
+    if(countwrds(result_word) == 0) error(1, 0, "No words used"); 
     int rSize = countwrds(result_word) + 1; //calc num of words in the string
     *word =(char **) malloc(rSize * sizeof(char *));
     (*word)[rSize-1] = NULL;
@@ -379,6 +388,7 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char ***
     outTok=strtok(output_word,s); 
     char *inTok;
     inTok=strtok(input_word,s);
+    if(hasOutput < hasInput) error(1, 0, "This Shouldn't Work");
     strcpy(*input,inTok);
     strcpy(*output, outTok);
     return;
@@ -418,8 +428,7 @@ void combine_helper(stack *opStack, stack *cmdStack, symbol_type *tempOp){
    popStack(cmdStack, l);
    popStack(cmdStack, r);
 
-
-  combine_commands(r,l, result, *tempOp);
+   combine_commands(r,l, result, *tempOp);
    pushStack(cmdStack, result);
    if (!StackisEmpty(opStack)) {
       topStack(opStack, tempOp);
@@ -438,146 +447,149 @@ void createSubshell(command_t topCommand, command_t subshellCommand){
 
 //Remember to fix & and *s
 void createSymbol(symbol_t *sym, symbol_type type) {
-	(*sym)->type = type;
-	symbol_t tempSymbol = newSymbol();
-	(*sym)->next = tempSymbol;
-	(*sym) = tempSymbol;
-	(*sym)->next = NULL;
+  (*sym)->type = type;
+  symbol_t tempSymbol = newSymbol();
+  (*sym)->next = tempSymbol;
+  (*sym) = tempSymbol;
+  (*sym)->next = NULL;
 }
 
 //Helper for turning simple commands into tokens
 //Pointer bug, fix later.
 void createSimpCommand(symbol_t *sym, int *len, int *maxLen, char **data, int *empty){
-	if (*len == *maxLen) {
-		*maxLen += 1;
-		*data = (char*)realloc(*data, (*maxLen)*sizeof(char));
-	}
-	(*data)[*len] = '\0';
-	(*sym)->simple_command = *data;
-	createSymbol(sym, COMMAND_SYMBOL);
+  if (*len == *maxLen) {
+    *maxLen += 1;
+    *data = (char*)realloc(*data, (*maxLen)*sizeof(char));
+  }
+  (*data)[*len] = '\0';
+  (*sym)->simple_command = *data;
+  createSymbol(sym, COMMAND_SYMBOL);
 
-	*len = 0;
-	*maxLen = initialSize;
-	*data = (char*)malloc(initialSize * sizeof(char));
-	*empty = 0;
+  *len = 0;
+  *maxLen = initialSize;
+  *data = (char*)malloc(initialSize * sizeof(char));
+  *empty = 0;
 }
 
 command_stream_t
 make_command_stream (int (*get_next_byte) (void *),
-		     void *get_next_byte_argument)
+         void *get_next_byte_argument)
 {
   /* FIXME: Replace this with your implementation.  You may need to
      add auxiliary functions and otherwise modify the source code.
      You can also use external functions defined in the GNU C Library.  */
-	char currentChar = get_next_byte(get_next_byte_argument);
+  char currentChar = get_next_byte(get_next_byte_argument);
 
-	int commandLength = 0;
-	int allocLength = initialSize;
-	char *simpleCommand = (char*)malloc(initialSize * sizeof(char));
-	int empty = 0; // Tracking whether the last simple command was empty.
-				   // 0 = empty, 1 = not empty
-	int skip = 0;  // Skips the character read at the end of each
-				   // iteration of while: ugly workaround to
-				   // distinguishing | and ||
+  int commandLength = 0;
+  int allocLength = initialSize;
+  char *simpleCommand = (char*)malloc(initialSize * sizeof(char));
+  int empty = 0; // Tracking whether the last simple command was empty.
+           // 0 = empty, 1 = not empty
+  int skip = 0;  // Skips the character read at the end of each
+           // iteration of while: ugly workaround to
+           // distinguishing | and ||
 
-	symbol_t currentSymbol = newSymbol();
-	symbol_t headSymbol = currentSymbol;
-	symbol_t tempSymbol;
-	while (currentChar != EOF) { // Parsing
-	switch (currentChar) {
-			case ';':
-				assert(empty == 1); // Assert that there is a non-null
-									// command prior, or the operation is
-									// invalid.
-				createSimpCommand(&currentSymbol, &commandLength, &allocLength, &simpleCommand, &empty);
-				currentSymbol->type = SEQUENCE_SYMBOL;
-				createSymbol(&currentSymbol, SEQUENCE_SYMBOL);
-				break;
-			case '|':
-				assert(empty == 1);
-				createSimpCommand(&currentSymbol, &commandLength, &allocLength, &simpleCommand, &empty);
-					// Check the next character. If it's also a pipe, we
-					// have an or operator. If it's anything else, it's
-					// just a pipe.
-				currentChar = get_next_byte(get_next_byte_argument);
-				if (currentChar == '|') {
-					createSymbol(&currentSymbol, OR_SYMBOL);
-				} else {
-					createSymbol(&currentSymbol, PIPE_SYMBOL);
-					skip = 1;
-				}
-				break;
-			case '&':
-				assert(empty == 1);
-				createSimpCommand(&currentSymbol, &commandLength, &allocLength, &simpleCommand, &empty);
-				assert (get_next_byte(get_next_byte_argument) == '&');
-					// If the & character isn't followed by another one,
-					// the operator is invalid.
-				createSymbol(&currentSymbol, AND_SYMBOL);
-				break;
-			case '(':
-				if (empty == 1) { // There does not necessarily need to
-								  // be a simple command before a '('
-				createSimpCommand(&currentSymbol, &commandLength, &allocLength, &simpleCommand, &empty);
-				}
+  symbol_t currentSymbol = newSymbol();
+  symbol_t headSymbol = currentSymbol;
+  symbol_t tempSymbol;
+  while (currentChar != EOF) { // Parsing
+  switch (currentChar) {
+      case ';':
+        assert(empty == 1); // Assert that there is a non-null
+                  // command prior, or the operation is
+                  // invalid.
+        createSimpCommand(&currentSymbol, &commandLength, &allocLength, &simpleCommand, &empty);
+        currentSymbol->type = SEQUENCE_SYMBOL;
+        createSymbol(&currentSymbol, SEQUENCE_SYMBOL);
+        break;
+      case '|':
+        assert(empty == 1);
+        createSimpCommand(&currentSymbol, &commandLength, &allocLength, &simpleCommand, &empty);
+          // Check the next character. If it's also a pipe, we
+          // have an or operator. If it's anything else, it's
+          // just a pipe.
+        currentChar = get_next_byte(get_next_byte_argument);
+        if (currentChar == '|') {
+          createSymbol(&currentSymbol, OR_SYMBOL);
+        } else {
+          createSymbol(&currentSymbol, PIPE_SYMBOL);
+          skip = 1;
+        }
+        break;
+      case '&':
+        assert(empty == 1);
+        createSimpCommand(&currentSymbol, &commandLength, &allocLength, &simpleCommand, &empty);
+        assert (get_next_byte(get_next_byte_argument) == '&');
+          // If the & character isn't followed by another one,
+          // the operator is invalid.
+        createSymbol(&currentSymbol, AND_SYMBOL);
+        break;
+      case '(':
+        if (empty == 1) { // There does not necessarily need to
+                  // be a simple command before a '('
+        createSimpCommand(&currentSymbol, &commandLength, &allocLength, &simpleCommand, &empty);
+        }
 
-				createSymbol(&currentSymbol, LBRACKET_SYMBOL);
-				break;
-			case ')':
-				assert(empty == 1);
-				createSimpCommand(&currentSymbol, &commandLength, &allocLength, &simpleCommand, &empty);
-				createSymbol(&currentSymbol, RBRACKET_SYMBOL);
-				break;
-			case '#': // Advance to end of line. No break becase # is
-					  // an effective newline
-				while (currentChar != '\n') {
-					currentChar = get_next_byte(get_next_byte_argument);
-				}
-			case '\n':
-				if (empty == 1) {
-					createSimpCommand(&currentSymbol, &commandLength, &allocLength, &simpleCommand, &empty);
-					// Check the next byte. if it's also a newline, we have a new command.
-					currentChar = get_next_byte(get_next_byte_argument);
-					if (currentChar == '\n' || currentChar == '#') {
-						createSymbol(&currentSymbol, NEWCOMMAND_SYMBOL);
-						while (currentChar == '\n') {
-							currentChar = get_next_byte(get_next_byte_argument);
-							if (currentChar =='#') {
-								while (currentChar != '\n') {
-									currentChar = get_next_byte(get_next_byte_argument);
-								}
-							}
-						}
-					} else if (currentChar == EOF) {
-						break;
-					} else { //otherwise, we just have a sequence command.
-						createSymbol(&currentSymbol, SEQUENCE_SYMBOL);
-					}
-					skip = 1;
-				}
-				break;
-			default: // Making the dangerous assumption that all other
-					 // characters are safe
-				if (empty == 0 && currentChar != ' ') {
-					empty = 1;
-				}
-				if (commandLength == allocLength) {
-					allocLength *= 2;
-					simpleCommand = realloc(simpleCommand, allocLength *
-									sizeof(char));
-				}
-				simpleCommand[commandLength++] = currentChar;
-				break;
-		}
-		if (skip == 0) {
-			currentChar = get_next_byte(get_next_byte_argument);
-		} else {
-			skip = 0;
-		}
-	}
+        createSymbol(&currentSymbol, LBRACKET_SYMBOL);
+        break;
+      case ')':
+        assert(empty == 1);
+        createSimpCommand(&currentSymbol, &commandLength, &allocLength, &simpleCommand, &empty);
+        createSymbol(&currentSymbol, RBRACKET_SYMBOL);
+        break;
+      case '#': // Advance to end of line. No break becase # is
+            // an effective newline
+        while (currentChar != '\n') {
+          currentChar = get_next_byte(get_next_byte_argument);
+        }
+      case '\n':
+        if (empty == 1) {
+          createSimpCommand(&currentSymbol, &commandLength, &allocLength, &simpleCommand, &empty);
+          // Check the next byte. if it's also a newline, we have a new command.
+          currentChar = get_next_byte(get_next_byte_argument);
+          if (currentChar == '\n' || currentChar == '#') {
+            createSymbol(&currentSymbol, NEWCOMMAND_SYMBOL);
+            while (currentChar == '\n') {
+              currentChar = get_next_byte(get_next_byte_argument);
+              if (currentChar =='#') {
+                while (currentChar != '\n') {
+                  currentChar = get_next_byte(get_next_byte_argument);
+                }
+              }
+            }
+          } else if (currentChar == EOF) {
+            break;
+          } else { //otherwise, we just have a sequence command.
+            createSymbol(&currentSymbol, SEQUENCE_SYMBOL);
+          }
+          skip = 1;
+        }
+        break;
+      case '`':
+        error(1, 0, "got a `");
+        break;
+      default: // Making the dangerous assumption that all other
+           // characters are safe
+        if (empty == 0 && currentChar != ' ') {
+          empty = 1;
+        }
+        if (commandLength == allocLength) {
+          allocLength *= 2;
+          simpleCommand = realloc(simpleCommand, allocLength *
+                  sizeof(char));
+        }
+        simpleCommand[commandLength++] = currentChar;
+        break;
+    }
+    if (skip == 0) {
+      currentChar = get_next_byte(get_next_byte_argument);
+    } else {
+      skip = 0;
+    }
+  }
 
-	//error (1, 0, "command reading not yet implemented");
-	//return 0;
+  //error (1, 0, "command reading not yet implemented");
+  //return 0;
 
   //TODO: initialize a command_stream linked list
 
@@ -592,7 +604,7 @@ make_command_stream (int (*get_next_byte) (void *),
 
   // Formerly parserOutput, now we use currentSymbol to denote the
   // current output node.
-	currentSymbol = headSymbol;
+  currentSymbol = headSymbol;
 
   //INIT STACKS
     stack operatorStack;
@@ -604,41 +616,41 @@ make_command_stream (int (*get_next_byte) (void *),
 
     newStack(&commandStack,sizeof(struct command));
     newStack(&operatorStack,sizeof(symbol_type)); //enums symbols are ints
-    while(!(currentSymbol->type == COMMAND_SYMBOL && currentSymbol->simple_command == NULL) /*currentSymbol != NULL*/) {
-	
+    while(!(currentSymbol->type == COMMAND_SYMBOL && currentSymbol->simple_command == NULL) /*currentSymbol != NULL*/) {  
       if(currentSymbol->type == NEWCOMMAND_SYMBOL){
-        //create a new command node, hoook the last one to the tail  of the stream
+        //create a new command node, hook the last one to the tail  of the stream
 
-	if(!StackisEmpty(&operatorStack)){//g)When all words are gone, pop each operator and 
-		//combine them with 2 commands similar to d)
-		symbol_type * tempOp = (symbol_type *)malloc(sizeof(symbol_type));
-		topStack(&operatorStack, tempOp);
-		while(!StackisEmpty(&operatorStack)){
-			combine_helper(&operatorStack,&commandStack,tempOp);
-		}
-	}
-      	popStack(&commandStack, currCommand); // get the command off the stack
-	currCommandNode->root = currCommand;  //attach the root to the commandNode	
+  if(!StackisEmpty(&operatorStack)){//g)When all words are gone, pop each operator and 
+    //combine them with 2 commands similar to d)
+    symbol_type * tempOp = (symbol_type *)malloc(sizeof(symbol_type));
+    topStack(&operatorStack, tempOp);
+    while(!StackisEmpty(&operatorStack)){
+      combine_helper(&operatorStack,&commandStack,tempOp);
+    }
+  }
+        popStack(&commandStack, currCommand); // get the command off the stack
+  currCommandNode->root = currCommand;  //attach the root to the commandNode  
         stream->tail->next = currCommandNode; //attach to tail
-	stream->tail = currCommandNode; //update tail
+  stream->tail = currCommandNode; //update tail
         currCommandNode->next = NULL; //update tail's next
-	
-	//create a new nodes for use;
-	currCommandNode = (command_node_t) malloc(sizeof(struct command_node));
-	currCommand = (command_t)malloc(sizeof(struct command));
-	
-	//clear the stacks
-	destroyStack(&operatorStack);
-	destroyStack(&commandStack);
-	newStack(&commandStack,sizeof(struct command));
-    	newStack(&operatorStack,sizeof(symbol_type)); //enums symbols are ints
+  
+  //create a new nodes for use;
+  currCommandNode = (command_node_t) malloc(sizeof(struct command_node));
+  currCommand = (command_t)malloc(sizeof(struct command));
+  
+  //clear the stacks
+  destroyStack(&operatorStack);
+  destroyStack(&commandStack);
+  newStack(&commandStack,sizeof(struct command));
+      newStack(&operatorStack,sizeof(symbol_type)); //enums symbols are ints
 
       } else if(currentSymbol->type == COMMAND_SYMBOL){
       //check if this symbol is a newline and the next symbol is a newline
       //a)If a simple command, push to a command stack
         struct command simpCommand;
         constructSimpleCommand(&simpCommand, currentSymbol->simple_command);
-	//printf("%d\n",simpCommand.type);
+
+  //printf("%d\n",simpCommand.type);
         pushStack(&commandStack, &simpCommand);
 
       } else if(currentSymbol->type == LBRACKET_SYMBOL){
@@ -658,6 +670,7 @@ make_command_stream (int (*get_next_byte) (void *),
         2)Stop when you reach an operator with lower precedence or a "("
         3)Push the operator onto the stack
       */
+
         symbol_type * tempOp = (symbol_type *)malloc(sizeof(symbol_type));
         topStack(&operatorStack, tempOp);
         while(!StackisEmpty(&operatorStack) && precedence(*tempOp)>=precedence(currentSymbol->type) && *tempOp != LBRACKET_SYMBOL){
@@ -670,6 +683,7 @@ make_command_stream (int (*get_next_byte) (void *),
     //(for each operator, pop two commands, combine, push back on command stack) 
     //until you find a matching "(". then create a subshell command by popping 
     //out 1 command from command stack.
+
         symbol_type * tempOp = (symbol_type *)malloc(sizeof(symbol_type));
         topStack(&operatorStack,tempOp);
         while(!StackisEmpty(&operatorStack) && *tempOp != LBRACKET_SYMBOL){
@@ -688,24 +702,29 @@ make_command_stream (int (*get_next_byte) (void *),
     
     //g)When all words are gone, pop each operator and 
     //combine them with 2 commands similar to d)
-    symbol_type * tempOp = (symbol_type *)malloc(sizeof(symbol_type));
-    topStack(&operatorStack, tempOp);
-    while(!StackisEmpty(&operatorStack)){
-        combine_helper(&operatorStack,&commandStack,tempOp);
+    if (!StackisEmpty(&operatorStack)) {
+       symbol_type * tempOp = (symbol_type *)malloc(sizeof(symbol_type));
+       topStack(&operatorStack, tempOp);
+       while(!StackisEmpty(&operatorStack)){
+           combine_helper(&operatorStack,&commandStack,tempOp);
+       }
     }
     
-    //rootNode is now ready to add to the tree.
-    command_t rootNode = (command_t)malloc(sizeof(struct command));;
+    if(!StackisEmpty(&commandStack)) {
+       //rootNode is now ready to add to the tree.
+       command_t rootNode = (command_t)malloc(sizeof(struct command));;
 
-    popStack(&commandStack, rootNode); 
-    //TODO: add the rootNode to a command_Node
-    currCommandNode->root = rootNode;
-    //TODO: add the command_Node to the linked list
-    stream->tail->next = currCommandNode; //ATTACHES THE LAST COMMAND
-    currCommandNode->next = NULL; //MARKS THE END
-    stream->tail=currCommandNode;
+       popStack(&commandStack, rootNode); 
+       //TODO: add the rootNode to a command_Node
+       currCommandNode->root = rootNode;
+       //TODO: add the command_Node to the linked list
+       stream->tail->next = currCommandNode; //ATTACHES THE LAST COMMAND
+       currCommandNode->next = NULL; //MARKS THE END
+    
+       stream->tail=currCommandNode;
+    }
+    stream->tail->next = NULL;
     //return Command_stream linked list
-	
     return stream;
 }
 
@@ -713,9 +732,9 @@ command_t
 read_command_stream (command_stream_t s)
 {
   if(s->head != NULL){
-	  command_node_t current = s->head; //get a pointer to a commandNode
-	  s->head = current -> next; //update the stream's head
-	  return current -> root; //return the command on the node
-	}
-	return NULL;
+    command_node_t current = s->head; //get a pointer to a commandNode
+    s->head = current -> next; //update the stream's head
+    return current -> root; //return the command on the node
+  }
+  return NULL;
 }
