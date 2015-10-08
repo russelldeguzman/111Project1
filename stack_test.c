@@ -18,15 +18,15 @@ int main(int argc, char **argv){
 	newStack(&dataStack, sizeof(struct data)); //initialize stack
 	pushStack(&dataStack, test);
 
-	struct data res;
-	wrapper(&dataStack, &res); 
-	struct data* foo;
+	struct data* res = (struct data *) malloc(sizeof(struct data));
+	wrapper(&dataStack, res); 
+	/**struct data* foo;
 	foo = &res;
 	struct data* bar;
 	bar = foo;
-	foo = NULL;
-	printf("%i\n", bar->y);
+	foo = NULL;*/
+	printf("%i\n", res->y);
 	destroyStack(&dataStack); //destroy stack
 	free(test);
-	free(bar);
+	free(res);
 }
