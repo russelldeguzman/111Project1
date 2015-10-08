@@ -8,7 +8,6 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdbool.h>
-#include <assert.h>
 #include <string.h>
 
 #define initialSize 5 
@@ -97,12 +96,16 @@ void append(command_node_t tail, command_node_t newNode){
 }
 
 void newStack(stack *st, int dataSize){
-	assert(dataSize > 0);
+	if (dataSize <= 0) {
+		error(4, 0, "Bad data size");
+	}
 	st->dataSize = dataSize;
 	st->length = 0;
 	st->allocLength = initialSize;
 	st->data = malloc(initialSize * dataSize);
-	assert(st->data != NULL);
+	if (st->data == NULL) {
+		error(5, 0, "st->data = NULL");
+	}
 } 
 
 //free stack
@@ -122,7 +125,9 @@ void pushStack(stack *st, const void* add){
 	if(st->length == st->allocLength){
 		st->allocLength *= 2;
 		st->data = realloc(st->data, st->allocLength * st->dataSize);
-		assert(st->data != NULL);
+		if (st->data == NULL) {
+			error(5, 0, "st->data = NULL");
+		}
 	}
 
 	destination = (char *)st->data + st->length * st->dataSize;
@@ -133,7 +138,9 @@ void pushStack(stack *st, const void* add){
 //pop
 void popStack(stack *st, void* top){
 	const void *src;
-	assert(!StackisEmpty(st));
+	if (StackisEmpty(st)) {
+		error(6, 0, "Empty stack");
+	}
 	st->length--;
 	src = (const char *) st->data + st->length * st->dataSize;
 	memcpy(top, src, st->dataSize);
@@ -142,7 +149,9 @@ void popStack(stack *st, void* top){
 //view top element (doesnt affect stack)
 void topStack(stack *st, void* top){
 	const void *src;
-	assert(!StackisEmpty(st));
+	if (StackisEmpty(st)) {
+		error(6, 0, "Empty stack");
+	}
 	src = (const char *) st->data + (st->length - 1) * st->dataSize;
 	memcpy(top, src, st->dataSize);
 }
@@ -202,6 +211,7 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char ***
     pos = pos + 1;
   }
   if(inputCount > 1 || outputCount > 1) error(1, 0, "Too many I/O symbols"); 
+  //if(outputCount == 1 && countwrds(parserOutput) == 1) error(1, 0, "pls"); 
   if(hasOutput == -1 && hasInput == -1){ //CASE 1: NO I/O REDIRECTION
     *input = NULL;
     *output = NULL;
@@ -495,15 +505,20 @@ make_command_stream (int (*get_next_byte) (void *),
 	while (currentChar != EOF) { // Parsing
 	switch (currentChar) {
 			case ';':
-				assert(empty == 1); // Assert that there is a non-null
-									// command prior, or the operation is
-									// invalid.
+				if (empty != 1) {
+					error(2, 0, "Too many operators");
+				}			// Assert that there is a non-null
+							// command prior, or the operation is
+							// invalid.
 				createSimpCommand(&currentSymbol, &commandLength, &allocLength, &simpleCommand, &empty);
 				currentSymbol->type = SEQUENCE_SYMBOL;
 				createSymbol(&currentSymbol, SEQUENCE_SYMBOL);
 				break;
 			case '|':
-				assert(empty == 1);
+				if (empty != 1) {
+					error(2, 0, "Too many operators");
+				}
+
 				createSimpCommand(&currentSymbol, &commandLength, &allocLength, &simpleCommand, &empty);
 					// Check the next character. If it's also a pipe, we
 					// have an or operator. If it's anything else, it's
@@ -517,9 +532,13 @@ make_command_stream (int (*get_next_byte) (void *),
 				}
 				break;
 			case '&':
-				assert(empty == 1);
+				if (empty != 1) {
+					error(2, 0, "Too many operators");
+				}
 				createSimpCommand(&currentSymbol, &commandLength, &allocLength, &simpleCommand, &empty);
-				assert (get_next_byte(get_next_byte_argument) == '&');
+				if (!(get_next_byte(get_next_byte_argument) == '&')) {
+					error(3, 0, "Too few & symbols");
+				}
 					// If the & character isn't followed by another one,
 					// the operator is invalid.
 				createSymbol(&currentSymbol, AND_SYMBOL);
@@ -533,7 +552,9 @@ make_command_stream (int (*get_next_byte) (void *),
 				createSymbol(&currentSymbol, LBRACKET_SYMBOL);
 				break;
 			case ')':
-				assert(empty == 1);
+				if (empty != 1) {
+					error(2, 0, "Too many operators");
+				}
 				createSimpCommand(&currentSymbol, &commandLength, &allocLength, &simpleCommand, &empty);
 				createSymbol(&currentSymbol, RBRACKET_SYMBOL);
 				break;
