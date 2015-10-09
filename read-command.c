@@ -211,7 +211,6 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char ***
     pos = pos + 1;
   }
   if(inputCount > 1 || outputCount > 1) error(1, 0, "Too many I/O symbols"); 
-  //if(outputCount == 1 && countwrds(parserOutput) == 1) error(1, 0, "pls"); 
   if(hasOutput == -1 && hasInput == -1){ //CASE 1: NO I/O REDIRECTION
     *input = NULL;
     *output = NULL;
@@ -235,6 +234,7 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char ***
     char result_word[pos];
     char output_word[pos];
     int i;
+    if(outputCount == 1 && countwrds(parserOutput) == 1) error(1, 0, "pls2");
 
     for(i = 0; i < hasOutput; i++){
       result_word[i] = parserOutput[i]; //get result word
@@ -326,6 +326,7 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char ***
     *input = (char* )malloc(sizeof(input_word));
     char *inTok;
     inTok=strtok(input_word,s);
+    if(inputCount == 1 && countwrds(inTok) < 1) error(1, 0, "pls1");
     *output = 0; 
     strcpy(*input,inTok);
     return;
