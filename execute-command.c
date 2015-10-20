@@ -22,34 +22,45 @@ execute_command (command_t c, int time_travel) //I think time_travel is implemen
 	if(c->type == AND_COMMAND){
 		//AND
 		execute_command(c->u.command[0],time_travel); //execute command 1
-		execute_command(c->u.command[1],time_travel); //execute command 2
+		if (c->u.command[0]->status == 0) { // It is defined that the second half of && only runs if the first half is true
+			execute_command(c->u.command[1],time_travel); //execute command 2
+		}
 		c->status = (c->u.command[0]->status) & (c->u.command[1]->status); //status is the & result of those two ops
 	}
-	else if(c->type == SEQUENCE_COMMAND){
-		//TODO: SEQUENCE_COMMAND
+	else if(c->type == SEQUENCE_COMMAND){ //very likely more complicated than this
+		execute_command(c->u.command[0],time_travel);
+		execute_command(c->u.command[1],time_travel);
 	}
 	else if(c->type == OR_COMMAND){
 		//OR
 		execute_command(c->u.command[0],time_travel); //execute command 1
-		execute_command(c->u.command[1],time_travel); //execute command 2
+		if (c->u.command[0]->status == 0) {
+			execute_command(c->u.command[1],time_travel); //execute command 2
+		}
 		c->status = (c->u.command[0]->status) | (c->u.command[1]->status); //status is the "or" result of those two ops
 	}
 	else if(c->type == PIPE_COMMAND){
 		//TODO: IMPLEMENT PIPE COMMAND
 	}
 	else if(c->type == SIMPLE_COMMAND){
-		//simplest case: exectue the command.
-		//TODO: Implement I/O redirection "<", ">"
+		//simplest case: execute the command.
+		if (c->input != NULL) { //TODO: Implement I/O redirection "<", ">"
+
+		}
+
+		if (c->input != NULL) {
+
+		}
 		int status;
 		pid_t pid = fork();
 		if(pid == 0){ //call execute in the child process
-		execvp(c->u.word[0],c->u.word);
-		//if execvp returns, there has been an error.
-		error(1,0, "Unknown command!");
+			execvp(c->u.word[0],c->u.word);
+			//if execvp returns, there has been an error.
+			error(1,0, "Unknown command!");
 		}
 		else{
 			waitpid(pid, &(status), 0);
-			c->status = status; 
+			c->status = status;
 		}
 	}
 	else if(c->type == SUBSHELL_COMMAND){
