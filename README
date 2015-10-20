@@ -80,3 +80,14 @@ d)If it is an operator and the operator stack is NOT empty
 e)If encounter ")", pop operators off the stack (for each operator, pop two commands, combine, push back on command stack) until you find a matching "(". then create a subshell command by popping out 1 command from command stack.
 f)Advance to next word (simple command, and, or) go to a)
 g)When all words are gone, pop each operator and combine them with 2 commands similar to d)
+
+
+I/O Implementation
+==================
+Usage details on dup2 and the parameters used were obtained from sample
+code in lecture notes found here:
+
+http://www.cs.loyola.edu/~jglenn/702/S2005/Examples/dup2.html
+
+Input is set to read only. Output is set to write only, truncate, create
+if nonexistent, RW rights for user and group.

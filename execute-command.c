@@ -44,13 +44,27 @@ execute_command (command_t c, int time_travel) //I think time_travel is implemen
 	}
 	else if(c->type == SIMPLE_COMMAND){
 		//simplest case: execute the command.
-		if (c->input != NULL) { //TODO: Implement I/O redirection "<", ">"
-
+		int in;
+		int out;
+		
+		if (c->input != NULL) { // I/O redirection "<", ">"
+			in = open(c->input, 0_RDONLY);
+			if (in < 0) {
+				error(5,0, "Error opening input file");
+			}
+			dup2(in, 0);
+			close(in);
 		}
 
-		if (c->input != NULL) {
-
+		if (c->input != NULL) { // Parameter wall comes from lecture notes from a 702 lecture at loyola
+			out = open("out", O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IRGRP | S_IWGRP | S_IWUSR);
+			if (out < 0) {
+				error(5,0, "Error opening input file");
+			}
+			dup2(out, 1);
+			close(out);
 		}
+		
 		int status;
 		pid_t pid = fork();
 		if(pid == 0){ //call execute in the child process
