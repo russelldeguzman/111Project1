@@ -455,7 +455,6 @@ void combine_helper(stack *opStack, stack *cmdStack, symbol_type *tempOp){
 
 //creates a subshell
 void createSubshell(command_t topCommand, command_t subshellCommand){
-  subshellCommand = (command_t) malloc(sizeof(struct command));
   subshellCommand->type = SUBSHELL_COMMAND;
   subshellCommand->status = -1; //TODO: change this in 1B.
   subshellCommand->input = NULL;
@@ -660,9 +659,10 @@ make_command_stream (int (*get_next_byte) (void *),
 		}
 	}
       	popStack(&commandStack, currCommand); // get the command off the stack
-	currCommandNode->root = currCommand;  //attach the root to the commandNode	
+		//if(currCommand->type ==SUBSHELL_COMMAND) printf("Here's a subshell!\n");
+		currCommandNode->root = currCommand;  //attach the root to the commandNode	
         stream->tail->next = currCommandNode; //attach to tail
-  stream->tail = currCommandNode; //update tail
+		stream->tail = currCommandNode; //update tail
         currCommandNode->next = NULL; //update tail's next
   
   //create a new nodes for use;
@@ -704,7 +704,7 @@ make_command_stream (int (*get_next_byte) (void *),
 
         symbol_type * tempOp = (symbol_type *)malloc(sizeof(symbol_type));
         topStack(&operatorStack, tempOp);
-        while(!StackisEmpty(&operatorStack) && precedence(*tempOp)>=precedence(currentSymbol->type) && *tempOp != LBRACKET_SYMBOL){
+        while(!StackisEmpty(&operatorStack) && *tempOp != LBRACKET_SYMBOL && precedence(*tempOp)>=precedence(currentSymbol->type)){
           combine_helper(&operatorStack, &commandStack, tempOp);
         }
         pushStack(&operatorStack, &(currentSymbol->type));
@@ -720,12 +720,18 @@ make_command_stream (int (*get_next_byte) (void *),
         while(!StackisEmpty(&operatorStack) && *tempOp != LBRACKET_SYMBOL){
           combine_helper(&operatorStack,&commandStack,tempOp);
         }
-        command_t subshellCommand = (command_t) malloc(sizeof(struct command));
+        //command_t subshellCommand = (command_t) malloc(sizeof(struct command));
         command_t topCommand = (command_t) malloc(sizeof(struct command));
+		command_t subshellCommand = (command_t) malloc(sizeof(struct command));
+		//struct command subshellCommand;
         popStack(&commandStack, topCommand);
         popStack(&operatorStack, tempOp);
         createSubshell(topCommand, subshellCommand);
-        pushStack(&commandStack, &subshellCommand);
+		//printf("%i\n",subshellCommand.type);
+        pushStack(&commandStack, subshellCommand);
+		//command_t temp = (command_t) malloc(sizeof(struct command));
+		//topStack(&commandStack, temp);
+		//printf("%i\n",temp->type);
       }
       //f) Advance to next word (simple command, and, or) go to a)
       currentSymbol=currentSymbol->next;
@@ -747,6 +753,7 @@ make_command_stream (int (*get_next_byte) (void *),
 
        popStack(&commandStack, rootNode); 
        //TODO: add the rootNode to a command_Node
+	  // printf("%i\n",rootNode->type);
        currCommandNode->root = rootNode;
        //TODO: add the command_Node to the linked list
        stream->tail->next = currCommandNode; //ATTACHES THE LAST COMMAND
@@ -755,6 +762,7 @@ make_command_stream (int (*get_next_byte) (void *),
        stream->tail=currCommandNode;
     }
     stream->tail->next = NULL;
+	
     //return Command_stream linked list
     return stream;
 }
@@ -765,6 +773,7 @@ read_command_stream (command_stream_t s)
   if(s->head != NULL){
     command_node_t current = s->head; //get a pointer to a commandNode
     s->head = current -> next; //update the stream's head
+	/*TODO: this is not being called for some reason in script2.sh*/ if(current->root->type ==SUBSHELL_COMMAND) printf("here's a subshell!\n");
     return current -> root; //return the command on the node
   }
   return NULL;

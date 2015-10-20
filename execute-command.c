@@ -9,7 +9,76 @@
 #include <sys/wait.h>
 /* FIXME: You may need to add #include directives, macro definitions,
    static function definitions, etc.  */
-
+   
+//TODO: FIX execute the subshell command
+//TODO: ALSO need to impelement I/O stuff for subshelll (may have to change read-command)
+void execute_subshell(command_t c, int time_travel){
+	printf("executing subshell\n");
+	execute_command(c->u.subshell_command,time_travel);
+	c->status = c->u.subshell_command->status;
+	printf("executed subshell\n");
+}
+//simplest case: exectue the command.
+//TODO: Implement I/O redirection "<", ">"
+void execute_simple(command_t c, int time_travel){
+			
+	int status;
+	pid_t pid = fork();
+	if(pid == 0){ //call execute in the child process
+		execvp(c->u.word[0],c->u.word);
+		//if execvp returns, there has been an error.
+		error(1,0, "Unknown command!");
+	}
+	else{
+			waitpid(pid, &(status), 0);
+			c->status = WEXITSTATUS(status); 
+	}
+}
+//OR COMMAND
+void execute_or(command_t c, int time_travel){
+	execute_command(c->u.command[0],time_travel); //execute command 1
+	if(c->u.command[0]->status == 0){
+		c->status = c->u.command[0]->status;
+		return;
+	}
+	execute_command(c->u.command[1],time_travel); //execute command 2
+	if(c->u.command[1]->status == 0){
+		c->status = c->u.command[1]->status;
+	}
+	else{
+		c->status = c->u.command[1]->status;
+	}
+}
+//AND COMMAND
+void execute_and(command_t c, int time_travel){
+	execute_command(c->u.command[0],time_travel); //execute command 1
+	if(c->u.command[0]->status != 0){
+		c->status = c->u.command[0]->status;
+		return;
+	}
+	else{
+		execute_command(c->u.command[1],time_travel); //execute command 2
+		c->status = c->u.command[1]->status; 
+	}
+}
+//TODO: FIX PIPE COMMAND
+void execute_pipe(command_t c, int time_travel){
+		int pfd[2];
+		if (pipe(pfd) == -1) { 
+		error(1, 0 , "Pipe system call error!");
+		}
+	
+		dup2(pfd[0],0);
+		dup2(pfd[1],1);
+		
+}
+//SEQUENCE_COMMAND
+void execute_sequence(command_t c, int time_travel){
+	execute_command(c->u.command[0],time_travel); //execute command 1
+	execute_command(c->u.command[1],time_travel); //execute command 2;
+	c->status = c->u.command[1]->status; // right tree is the sequence command's status
+}
+    
 int
 command_status (command_t c)
 {
@@ -20,42 +89,22 @@ void
 execute_command (command_t c, int time_travel) //I think time_travel is implemented in 1c, won't touch for now
 {
 	if(c->type == AND_COMMAND){
-		//AND
-		execute_command(c->u.command[0],time_travel); //execute command 1
-		execute_command(c->u.command[1],time_travel); //execute command 2
-		c->status = (c->u.command[0]->status) & (c->u.command[1]->status); //status is the & result of those two ops
+		execute_and(c,time_travel);
 	}
 	else if(c->type == SEQUENCE_COMMAND){
-		//TODO: SEQUENCE_COMMAND
+		execute_sequence(c, time_travel);
 	}
 	else if(c->type == OR_COMMAND){
-		//OR
-		execute_command(c->u.command[0],time_travel); //execute command 1
-		execute_command(c->u.command[1],time_travel); //execute command 2
-		c->status = (c->u.command[0]->status) | (c->u.command[1]->status); //status is the "or" result of those two ops
+		execute_or(c, time_travel);
 	}
 	else if(c->type == PIPE_COMMAND){
-		//TODO: IMPLEMENT PIPE COMMAND
+		execute_pipe(c, time_travel);
 	}
 	else if(c->type == SIMPLE_COMMAND){
-		//simplest case: exectue the command.
-		//TODO: Implement I/O redirection "<", ">"
-		int status;
-		pid_t pid = fork();
-		if(pid == 0){ //call execute in the child process
-		execvp(c->u.word[0],c->u.word);
-		//if execvp returns, there has been an error.
-		error(1,0, "Unknown command!");
-		}
-		else{
-			waitpid(pid, &(status), 0);
-			c->status = status; 
-		}
+		execute_simple(c, time_travel);
 	}
 	else if(c->type == SUBSHELL_COMMAND){
-		//execute the subshell command
-		execute_command(c->u.subshell_command,time_travel);
-		c->status = c->u.subshell_command->status;
+		execute_subshell(c, time_travel);
 	}
 	else{
 		error(1,0, "Invalid command type!");
