@@ -32,9 +32,9 @@ typedef enum {
 } symbol_type;
 
 struct symbol {
-	symbol_type type;
-	char *simple_command;
-	struct symbol *next;
+  symbol_type type;
+  char *simple_command;
+  struct symbol *next;
 };
 
 typedef struct {
@@ -46,48 +46,48 @@ typedef struct {
 
   //Command Node
 struct command_node {
-	command_t root;
-	command_node_t next;
+  command_t root;
+  command_node_t next;
 };
 
 struct command_stream{
-	command_node_t head;
-	command_node_t tail;
+  command_node_t head;
+  command_node_t tail;
 };
 
 symbol_t newSymbol() {
-	struct symbol *new = (struct symbol*)malloc(sizeof(struct symbol));
-	new->simple_command = NULL;
-	new->next = NULL;
-	return new;
+  struct symbol *new = (struct symbol*)malloc(sizeof(struct symbol));
+  new->simple_command = NULL;
+  new->next = NULL;
+  return new;
 }
 
 int precedence(symbol_type op){
-	if(op == SEQUENCE_SYMBOL){
-		return 1;
-	}
-	else if(op == OR_SYMBOL || op == AND_SYMBOL){
-		return 2;
-	}
-	else if(op == PIPE_SYMBOL){
-		return 3;
-	}
-	else{
-		printf("Error! %d\n", op);
-		return -1;
-	}
+  if(op == SEQUENCE_SYMBOL){
+    return 1;
+  }
+  else if(op == OR_SYMBOL || op == AND_SYMBOL){
+    return 2;
+  }
+  else if(op == PIPE_SYMBOL){
+    return 3;
+  }
+  else{
+    printf("Error! %d\n", op);
+    return -1;
+  }
 }
 
 //command_node initalize
 void node_init(command_node_t n, command_t command){
-	n->root=command;
-	n->next=NULL;
+  n->root=command;
+  n->next=NULL;
 }
 //get tail of list
 command_node_t getTail(command_node_t head){
-	command_node_t tail=head;
-	while(tail->next != NULL) tail=tail->next;
-	return tail;
+  command_node_t tail=head;
+  while(tail->next != NULL) tail=tail->next;
+  return tail;
 }
 
 //add to list
@@ -112,13 +112,13 @@ void newStack(stack *st, int dataSize){
 
 //free stack
 void destroyStack(stack *st){
-	free(st->data);
+  free(st->data);
 } 
 
 //isempty
 bool StackisEmpty(const stack *st){
-	if(st->length == 0) return true;
-	return false;
+  if(st->length == 0) return true;
+  return false;
 } 
 
  //push
@@ -167,11 +167,11 @@ void commandStreamInit(command_stream_t stream){
 
 // 0 is false, 1 is true.
 int isOperator(symbol_type t) {
-	if (t == SEQUENCE_SYMBOL || t == AND_SYMBOL || t == OR_SYMBOL || t == PIPE_SYMBOL) {
-		return 1;
-	} else {
-		return 0;
-	}
+  if (t == SEQUENCE_SYMBOL || t == AND_SYMBOL || t == OR_SYMBOL || t == PIPE_SYMBOL) {
+    return 1;
+  } else {
+    return 0;
+  }
 }
 
 // goes through an idetnified simple command and checks for input and output redirection and puts it inside the command
@@ -202,7 +202,8 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char ***
   int hasOutput = -1; //represents the position of '>'
   int outputCount = 0;
   while(parserOutput[pos] != '\0'){ //TODO: remember to end strings with '\0'
-    if(parserOutput[pos] == '<'){
+
+  if(parserOutput[pos] == '<'){
 	 hasInput = pos; 
 	inputCount++;
 	}
@@ -452,7 +453,6 @@ void combine_helper(stack *opStack, stack *cmdStack, symbol_type *tempOp){
 
 //creates a subshell
 void createSubshell(command_t topCommand, command_t subshellCommand){
-  subshellCommand = (command_t) malloc(sizeof(struct command));
   subshellCommand->type = SUBSHELL_COMMAND;
   subshellCommand->status = -1; //TODO: change this in 1B.
   subshellCommand->input = NULL;
@@ -462,37 +462,38 @@ void createSubshell(command_t topCommand, command_t subshellCommand){
 
 //Remember to fix & and *s
 void createSymbol(symbol_t *sym, symbol_type type) {
-	(*sym)->type = type;
-	symbol_t tempSymbol = newSymbol();
-	(*sym)->next = tempSymbol;
-	(*sym) = tempSymbol;
-	(*sym)->next = NULL;
+  (*sym)->type = type;
+  symbol_t tempSymbol = newSymbol();
+  (*sym)->next = tempSymbol;
+  (*sym) = tempSymbol;
+  (*sym)->next = NULL;
 }
 
 //Helper for turning simple commands into tokens
 //Pointer bug, fix later.
 void createSimpCommand(symbol_t *sym, int *len, int *maxLen, char **data, int *empty){
-	if (*len == *maxLen) {
-		*maxLen += 1;
-		*data = (char*)realloc(*data, (*maxLen)*sizeof(char));
-	}
-	(*data)[*len] = '\0';
-	(*sym)->simple_command = *data;
-	createSymbol(sym, COMMAND_SYMBOL);
+  if (*len == *maxLen) {
+    *maxLen += 1;
+    *data = (char*)realloc(*data, (*maxLen)*sizeof(char));
+  }
+  (*data)[*len] = '\0';
+  (*sym)->simple_command = *data;
+  createSymbol(sym, COMMAND_SYMBOL);
 
-	*len = 0;
-	*maxLen = initialSize;
-	*data = (char*)malloc(initialSize * sizeof(char));
-	*empty = 0;
+  *len = 0;
+  *maxLen = initialSize;
+  *data = (char*)malloc(initialSize * sizeof(char));
+  *empty = 0;
 }
 
 command_stream_t
 make_command_stream (int (*get_next_byte) (void *),
-		     void *get_next_byte_argument)
+         void *get_next_byte_argument)
 {
   /* FIXME: Replace this with your implementation.  You may need to
      add auxiliary functions and otherwise modify the source code.
      You can also use external functions defined in the GNU C Library.  */
+
 	char currentChar = get_next_byte(get_next_byte_argument);
 
 	int commandLength = 0;
@@ -650,7 +651,7 @@ make_command_stream (int (*get_next_byte) (void *),
 
   // Formerly parserOutput, now we use currentSymbol to denote the
   // current output node.
-	currentSymbol = headSymbol;
+  currentSymbol = headSymbol;
 
 //	while (currentSymbol != NULL) {
 //		printf("\n%d", currentSymbol->type);
@@ -669,6 +670,7 @@ make_command_stream (int (*get_next_byte) (void *),
 
     newStack(&commandStack,sizeof(struct command));
     newStack(&operatorStack,sizeof(symbol_type)); //enums symbols are ints
+
     while(!(currentSymbol->type == COMMAND_SYMBOL && currentSymbol->simple_command == NULL) /*currentSymbol != NULL*/) {	
       if(currentSymbol->type == NEWCOMMAND_SYMBOL){
         //create a new command node, hook the last one to the tail  of the stream
@@ -682,20 +684,21 @@ make_command_stream (int (*get_next_byte) (void *),
 		}
 	}
       	popStack(&commandStack, currCommand); // get the command off the stack
-	currCommandNode->root = currCommand;  //attach the root to the commandNode	
+		//if(currCommand->type ==SUBSHELL_COMMAND) printf("Here's a subshell!\n");
+		currCommandNode->root = currCommand;  //attach the root to the commandNode	
         stream->tail->next = currCommandNode; //attach to tail
-	stream->tail = currCommandNode; //update tail
+		stream->tail = currCommandNode; //update tail
         currCommandNode->next = NULL; //update tail's next
-	
-	//create a new nodes for use;
-	currCommandNode = (command_node_t) malloc(sizeof(struct command_node));
-	currCommand = (command_t)malloc(sizeof(struct command));
-	
-	//clear the stacks
-	destroyStack(&operatorStack);
-	destroyStack(&commandStack);
-	newStack(&commandStack,sizeof(struct command));
-    	newStack(&operatorStack,sizeof(symbol_type)); //enums symbols are ints
+  
+  //create a new nodes for use;
+  currCommandNode = (command_node_t) malloc(sizeof(struct command_node));
+  currCommand = (command_t)malloc(sizeof(struct command));
+  
+  //clear the stacks
+  destroyStack(&operatorStack);
+  destroyStack(&commandStack);
+  newStack(&commandStack,sizeof(struct command));
+      newStack(&operatorStack,sizeof(symbol_type)); //enums symbols are ints
 
       } else if(currentSymbol->type == COMMAND_SYMBOL){
       //check if this symbol is a newline and the next symbol is a newline
@@ -726,7 +729,7 @@ make_command_stream (int (*get_next_byte) (void *),
 
         symbol_type * tempOp = (symbol_type *)malloc(sizeof(symbol_type));
         topStack(&operatorStack, tempOp);
-        while(!StackisEmpty(&operatorStack) && precedence(*tempOp)>=precedence(currentSymbol->type) && *tempOp != LBRACKET_SYMBOL){
+        while(!StackisEmpty(&operatorStack) && *tempOp != LBRACKET_SYMBOL && precedence(*tempOp)>=precedence(currentSymbol->type)){
           combine_helper(&operatorStack, &commandStack, tempOp);
         }
         pushStack(&operatorStack, &(currentSymbol->type));
@@ -742,12 +745,18 @@ make_command_stream (int (*get_next_byte) (void *),
         while(!StackisEmpty(&operatorStack) && *tempOp != LBRACKET_SYMBOL){
           combine_helper(&operatorStack,&commandStack,tempOp);
         }
-        command_t subshellCommand = (command_t) malloc(sizeof(struct command));
+        //command_t subshellCommand = (command_t) malloc(sizeof(struct command));
         command_t topCommand = (command_t) malloc(sizeof(struct command));
+		command_t subshellCommand = (command_t) malloc(sizeof(struct command));
+		//struct command subshellCommand;
         popStack(&commandStack, topCommand);
         popStack(&operatorStack, tempOp);
         createSubshell(topCommand, subshellCommand);
-        pushStack(&commandStack, &subshellCommand);
+		//printf("%i\n",subshellCommand.type);
+        pushStack(&commandStack, subshellCommand);
+		//command_t temp = (command_t) malloc(sizeof(struct command));
+		//topStack(&commandStack, temp);
+		//printf("%i\n",temp->type);
       }
       //f) Advance to next word (simple command, and, or) go to a)
       currentSymbol=currentSymbol->next;
@@ -769,6 +778,7 @@ make_command_stream (int (*get_next_byte) (void *),
 
        popStack(&commandStack, rootNode); 
        //TODO: add the rootNode to a command_Node
+	  // printf("%i\n",rootNode->type);
        currCommandNode->root = rootNode;
        //TODO: add the command_Node to the linked list
        stream->tail->next = currCommandNode; //ATTACHES THE LAST COMMAND
@@ -777,6 +787,7 @@ make_command_stream (int (*get_next_byte) (void *),
        stream->tail=currCommandNode;
     }
     stream->tail->next = NULL;
+	
     //return Command_stream linked list
     return stream;
 }
@@ -785,9 +796,10 @@ command_t
 read_command_stream (command_stream_t s)
 {
   if(s->head != NULL){
-	  command_node_t current = s->head; //get a pointer to a commandNode
-	  s->head = current -> next; //update the stream's head
-	  return current -> root; //return the command on the node
-	}
-	return NULL;
+    command_node_t current = s->head; //get a pointer to a commandNode
+    s->head = current -> next; //update the stream's head
+	/*TODO: this is not being called for some reason in script2.sh*/ if(current->root->type ==SUBSHELL_COMMAND) printf("here's a subshell!\n");
+    return current -> root; //return the command on the node
+  }
+  return NULL;
 }
