@@ -10,7 +10,7 @@
 #include <stdbool.h>
 #include <string.h>
 
-#define initialSize 5 
+#define initialSize 5
 
 /* FIXME: You may need to add #include directives, macro definitions,
    static function definitions, etc.  */
@@ -26,7 +26,9 @@ typedef enum {
 	LBRACKET_SYMBOL,	// (
 	RBRACKET_SYMBOL,	// )
 	SEQUENCE_SYMBOL,	// ;
-	NEWCOMMAND_SYMBOL	// \n
+	NEWCOMMAND_SYMBOL,	// \n
+	INPUT_SYMBOL,		// <
+	OUTPUT_SYMBOL		// >
 } symbol_type;
 
 struct symbol {
@@ -39,7 +41,7 @@ typedef struct {
 	void *data; //data pointer
 	int dataSize; //the size of the particular data (e.g. sizeof(int))
 	int length; //number of elements in the container
-	int allocLength; //the length of memory reserved for this container 
+	int allocLength; //the length of memory reserved for this container
 } stack;
 
   //Command Node
@@ -88,11 +90,11 @@ command_node_t getTail(command_node_t head){
 	return tail;
 }
 
-//add to list 
+//add to list
 void append(command_node_t tail, command_node_t newNode){
 	tail->next=newNode;
 	newNode->next=NULL;
-	tail=tail->next;	
+	tail=tail->next;
 }
 
 void newStack(stack *st, int dataSize){
@@ -205,12 +207,12 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char ***
 	inputCount++;
 	}
     if(parserOutput[pos] == '>'){
-	 hasOutput = pos; 
-	outputCount++; 
+	 hasOutput = pos;
+	outputCount++;
 	}
     pos = pos + 1;
   }
-  if(inputCount > 1 || outputCount > 1) error(1, 0, "Too many I/O symbols"); 
+  if(inputCount > 1 || outputCount > 1) error(1, 0, "Too many I/O symbols");
 
   if(hasOutput == -1 && hasInput == -1){ //CASE 1: NO I/O REDIRECTION
     *input = NULL;
@@ -258,7 +260,7 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char ***
     }
     int offset = i;
     for(i = offset; i < pos; i++){
-      output_word[i - offset] = parserOutput[i]; //get output 
+      output_word[i - offset] = parserOutput[i]; //get output
     }
     output_word[pos - offset] = '\0';
 
@@ -281,15 +283,15 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char ***
     outTok=strtok(output_word,s);
     strcpy(*output, outTok);
     return;
-    
-  } 
+
+  }
   if(hasOutput == -1 && hasInput != -1){//CASE 3: Input but no Output
     char result_word[pos];
     char input_word[pos];
     int i;
 
     for(i = 0; i<hasInput; i++){
-      result_word[i] = parserOutput[i]; //get result word 
+      result_word[i] = parserOutput[i]; //get result word
     }
 
     if(isspace(result_word[hasInput-1])){ //elim whitespace before < if there is one
@@ -308,10 +310,10 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char ***
     int offset = i;
 
     for(i = offset; i < pos; i++){
-      input_word[i - offset] = parserOutput[i]; //get output 
+      input_word[i - offset] = parserOutput[i]; //get output
     }
     input_word[pos - offset] = '\0';
-    if(countwrds(result_word) == 0) error(1, 0, "No words used"); 
+    if(countwrds(result_word) == 0) error(1, 0, "No words used");
     int rSize = countwrds(result_word) + 1; //calc num of words in the string
     *word =(char **) malloc(rSize * sizeof(char *));
     (*word)[rSize-1] = NULL;
@@ -334,8 +336,8 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char ***
     return;
   }
   if(hasInput != -1 && hasOutput != -1){//CASE 4: has both I/O
-    //In test cases, Input always comes before Output, so I'm going to assume that's 
-    //the correct syntax. 
+    //In test cases, Input always comes before Output, so I'm going to assume that's
+    //the correct syntax.
     char result_word[pos];
     char input_word[pos];
     char output_word[pos];
@@ -359,7 +361,7 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char ***
     int offset = i;
 
     for(i = offset; i < hasOutput; i++){
-      input_word[i - offset] = parserOutput[i]; //get output 
+      input_word[i - offset] = parserOutput[i]; //get output
     }
 
     if(isspace(result_word[hasOutput-1])){ //elim whitespace before > if there is one
@@ -377,7 +379,7 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char ***
     }
     offset = i;
     for(i = offset; i < pos; i++){
-      output_word[i - offset] = parserOutput[i]; //get output 
+      output_word[i - offset] = parserOutput[i]; //get output
     }
     output_word[pos - offset] = '\0';
 
@@ -398,7 +400,7 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char ***
     *input = (char* )malloc(sizeof(input_word));
     *output = (char* )malloc(sizeof(output_word));
     char *outTok;
-    outTok=strtok(output_word,s); 
+    outTok=strtok(output_word,s);
     char *inTok;
     inTok=strtok(input_word,s);
     if(hasOutput < hasInput) error(1, 0, "This Shouldn't Work");
@@ -412,7 +414,7 @@ void parseSimpCommand(char * parserOutput, char **input, char **output, char ***
 
 //breaks up the simple command from the parser and constructs command
 void constructSimpleCommand(command_t com, char * parserOutput){
-  com->type = SIMPLE_COMMAND; 
+  com->type = SIMPLE_COMMAND;
   //printf("%d\n", SIMPLE_COMMAND);
   com->status =  -1; //TODO: EDIT THIS IN LAB 1B
   parseSimpCommand(parserOutput, &(com->input), &(com->output), &(com->u.word));/*TODO: Need to check this*/
@@ -423,7 +425,7 @@ void combine_commands(command_t right,command_t left ,command_t result, symbol_t
   if(op == AND_SYMBOL) result->type = AND_COMMAND;
   else if(op ==SEQUENCE_SYMBOL) result->type = SEQUENCE_COMMAND;
   else if(op == OR_SYMBOL) result->type = OR_COMMAND;
-  else result->type = PIPE_COMMAND; 
+  else result->type = PIPE_COMMAND;
 
   result->status = -1; //TODO: for part 1B ( dont worry for 1A)
   result->input = NULL;
@@ -591,6 +593,12 @@ make_command_stream (int (*get_next_byte) (void *),
 				break;
 			case '`':
 				error(1, 0, "got a `");
+				break;
+			case '<':
+
+				break;
+			case '>':
+
 				break;
 			default: // Making the dangerous assumption that all other
 					 // characters are safe
