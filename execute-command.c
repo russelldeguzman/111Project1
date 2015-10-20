@@ -5,8 +5,11 @@
 
 #include <error.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
+
 /* FIXME: You may need to add #include directives, macro definitions,
    static function definitions, etc.  */
 
@@ -48,12 +51,12 @@ execute_command (command_t c, int time_travel) //I think time_travel is implemen
 		int out;
 		
 		if (c->input != NULL) { // I/O redirection "<", ">"
-			in = open(c->input, 0_RDONLY);
-			if (in < 0) {
-				error(5,0, "Error opening input file");
-			}
-			dup2(in, 0);
-			close(in);
+			//in = open(c->input, O_RDONLY);
+			//if (in < 0) {
+			//	error(5,0, "Error opening input file");
+			//}
+			//dup2(in, 0);
+			//close(in);
 		}
 
 		if (c->input != NULL) { // Parameter wall comes from lecture notes from a 702 lecture at loyola

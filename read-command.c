@@ -516,7 +516,7 @@ make_command_stream (int (*get_next_byte) (void *),
 							// command prior, or the operation is
 							// invalid.
 				createSimpCommand(&currentSymbol, &commandLength, &allocLength, &simpleCommand, &empty);
-				currentSymbol->type = SEQUENCE_SYMBOL;
+				//currentSymbol->type = SEQUENCE_SYMBOL;
 				createSymbol(&currentSymbol, SEQUENCE_SYMBOL);
 				break;
 			case '|':
@@ -652,6 +652,13 @@ make_command_stream (int (*get_next_byte) (void *),
   // current output node.
 	currentSymbol = headSymbol;
 
+//	while (currentSymbol != NULL) {
+//		printf("\n%d", currentSymbol->type);
+//		if (currentSymbol->type == SIMPLE_COMMAND) {
+//			printf("\n%d", currentSymbol->simple_command);
+//		}
+//		currentSymbol = currentSymbol->next;
+//	}
   //INIT STACKS
     stack operatorStack;
     stack commandStack;
