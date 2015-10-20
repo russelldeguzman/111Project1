@@ -511,7 +511,7 @@ make_command_stream (int (*get_next_byte) (void *),
 	switch (currentChar) {
 			case ';':
 				if (empty != 1) {
-					error(2, 0, "Too many operators");
+					error(2, 0, "Too many operators: ;");
 				}			// Assert that there is a non-null
 							// command prior, or the operation is
 							// invalid.
@@ -521,7 +521,7 @@ make_command_stream (int (*get_next_byte) (void *),
 				break;
 			case '|':
 				if (empty != 1) {
-					error(2, 0, "Too many operators");
+					error(2, 0, "Too many operators: |");
 				}
 
 				createSimpCommand(&currentSymbol, &commandLength, &allocLength, &simpleCommand, &empty);
@@ -538,7 +538,7 @@ make_command_stream (int (*get_next_byte) (void *),
 				break;
 			case '&':
 				if (empty != 1) {
-					error(2, 0, "Too many operators");
+					error(2, 0, "Too many operators: &");
 				}
 				createSimpCommand(&currentSymbol, &commandLength, &allocLength, &simpleCommand, &empty);
 				if (!(get_next_byte(get_next_byte_argument) == '&')) {
@@ -558,7 +558,7 @@ make_command_stream (int (*get_next_byte) (void *),
 				break;
 			case ')':
 				if (empty != 1) {
-					error(2, 0, "Too many operators");
+					error(2, 0, "Too many operators: )");
 				}
 				createSimpCommand(&currentSymbol, &commandLength, &allocLength, &simpleCommand, &empty);
 				createSymbol(&currentSymbol, RBRACKET_SYMBOL);
@@ -595,10 +595,24 @@ make_command_stream (int (*get_next_byte) (void *),
 				error(1, 0, "got a `");
 				break;
 			case '<':
-
+				if (empty != 1) {
+					error(2, 0, "Too many operators: <");
+				}			// Assert that there is a non-null
+							// command prior, or the operation is
+							// invalid.
+				createSimpCommand(&currentSymbol, &commandLength, &allocLength, &simpleCommand, &empty);
+				currentSymbol->type = INPUT_SYMBOL;
+				createSymbol(&currentSymbol, INPUT_SYMBOL);
 				break;
 			case '>':
-
+				if (empty != 1) {
+					error(2, 0, "Too many operators: >");
+				}			// Assert that there is a non-null
+							// command prior, or the operation is
+							// invalid.
+				createSimpCommand(&currentSymbol, &commandLength, &allocLength, &simpleCommand, &empty);
+				currentSymbol->type = OUTPUT_SYMBOL;
+				createSymbol(&currentSymbol, OUTPUT_SYMBOL);
 				break;
 			default: // Making the dangerous assumption that all other
 					 // characters are safe
