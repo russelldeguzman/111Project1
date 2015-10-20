@@ -26,10 +26,10 @@ void execute_subshell(command_t c, int time_travel){
 		close(in);
 	}
 	
-	if (c->input != NULL) { // Parameter wall comes from lecture notes from a 702 lecture at loyola
+	if (c->output != NULL) { // Parameter wall comes from lecture notes from a 702 lecture at loyola
 		out = open("out", O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IRGRP | S_IWGRP | S_IWUSR);
 		if (out < 0) {
-			error(5,0, "Error opening input file");
+			error(5,0, "Error opening output file");
 		}
 		dup2(out, 1);
 		close(out);
@@ -54,10 +54,10 @@ void execute_simple(command_t c, int time_travel){
 		close(in);
 	}
 	
-	if (c->input != NULL) { // Parameter wall comes from lecture notes from a 702 lecture at loyola
+	if (c->output != NULL) { // Parameter wall comes from lecture notes from a 702 lecture at loyola
 		out = open("out", O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IRGRP | S_IWGRP | S_IWUSR);
 		if (out < 0) {
-			error(5,0, "Error opening input file");
+			error(5,0, "Error opening output file");
 		}
 		dup2(out, 1);
 		close(out);
