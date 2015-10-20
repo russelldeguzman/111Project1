@@ -501,7 +501,7 @@ make_command_stream (int (*get_next_byte) (void *),
 	int allocLength = initialSize;
 	char *simpleCommand = (char*)malloc(initialSize * sizeof(char));
 	int empty = 0; // Tracking whether the last simple command was empty.
-				   // 0 = empty, 1 = not empty
+				   // 0 = empty, 1 = command, 2 = subshell
 	int skip = 0;  // Skips the character read at the end of each
 				   // iteration of while: ugly workaround to
 				   // distinguishing | and ||
@@ -564,6 +564,7 @@ make_command_stream (int (*get_next_byte) (void *),
 				}
 				createSimpCommand(&currentSymbol, &commandLength, &allocLength, &simpleCommand, &empty);
 				createSymbol(&currentSymbol, RBRACKET_SYMBOL);
+				empty = 2;
 				break;
 			case '#': // Advance to end of line. No break becase # is
 					  // an effective newline
@@ -571,8 +572,12 @@ make_command_stream (int (*get_next_byte) (void *),
 					currentChar = get_next_byte(get_next_byte_argument);
 				}
 			case '\n':
-				if (empty == 1) {
-					createSimpCommand(&currentSymbol, &commandLength, &allocLength, &simpleCommand, &empty);
+				if (empty > 0) {
+					if (empty == 1) {
+						createSimpCommand(&currentSymbol, &commandLength, &allocLength, &simpleCommand, &empty);
+					} else {
+						empty = 0;
+					}
 					// Check the next byte. if it's also a newline, we have a new command.
 					currentChar = get_next_byte(get_next_byte_argument);
 					if (currentChar == '\n' || currentChar == '#') {
@@ -654,13 +659,6 @@ make_command_stream (int (*get_next_byte) (void *),
   // current output node.
   currentSymbol = headSymbol;
 
-//	while (currentSymbol != NULL) {
-//		printf("\n%d", currentSymbol->type);
-//		if (currentSymbol->type == SIMPLE_COMMAND) {
-//			printf("\n%d", currentSymbol->simple_command);
-//		}
-//		currentSymbol = currentSymbol->next;
-//	}
   //INIT STACKS
     stack operatorStack;
     stack commandStack;

@@ -15,10 +15,8 @@
 //TODO: FIX execute the subshell command
 //TODO: ALSO need to impelement I/O stuff for subshelll (may have to change read-command)
 void execute_subshell(command_t c, int time_travel){
-	printf("executing subshell\n");
 	execute_command(c->u.subshell_command,time_travel);
 	c->status = c->u.subshell_command->status;
-	printf("executed subshell\n");
 }
 //simplest case: exectue the command.
 //TODO: Implement I/O redirection "<", ">"
@@ -65,7 +63,7 @@ void execute_or(command_t c, int time_travel){
 	}
 	execute_command(c->u.command[1],time_travel); //execute command 2
 	
-	c->u.command[1]->status == 0
+	c->u.command[1]->status == 0;
 	c->status = c->u.command[1]->status;
 }
 //AND COMMAND
