@@ -12,7 +12,7 @@
 #include <string.h>
 
 #define initialSize 5
-
+#define IO_LENGTH 20
 /* FIXME: You may need to add #include directives, macro definitions,
    static function definitions, etc.  */
 
@@ -486,6 +486,11 @@ void createSimpCommand(symbol_t *sym, int *len, int *maxLen, char **data, int *e
   *data = (char*)malloc(initialSize * sizeof(char));
   *empty = 0;
 }
+//Helper for parsing the IO given the new updated symbols
+char * parseIO(char * io){
+	char * token = strtok(io," ");
+	return token;
+}
 
 command_stream_t
 make_command_stream (int (*get_next_byte) (void *),
@@ -759,6 +764,32 @@ make_command_stream (int (*get_next_byte) (void *),
 		//topStack(&commandStack, temp);
 		//printf("%i\n",temp->type);
       }
+	  else if(currentSymbol->type == INPUT_SYMBOL){
+		//assign next symbol as  the input of the top of the command stack
+		symbol_t tempSymbol = currentSymbol->next; //get the next symbol
+		if(tempSymbol == NULL)error(1,0, "Bad Input Error");
+		if(tempSymbol->simple_command == NULL)error(1,0, "Bad Input Error");
+		command_t topCommand = (command_t)malloc(sizeof(struct command));
+		popStack(&commandStack,topCommand); 
+		topCommand->input = (char *)malloc(sizeof(char) * IO_LENGTH);
+		char * in = parseIO(tempSymbol->simple_command);
+		strcpy(topCommand->input,in);
+		pushStack(&commandStack,topCommand);
+		currentSymbol = currentSymbol->next;
+	  }
+	  else if(currentSymbol->type == OUTPUT_SYMBOL){
+		// assign the next symbol as the output of the top of the command stack
+		symbol_t tempSymbol = currentSymbol->next; //get the next symbol
+		if(tempSymbol == NULL)error(1,0, "Bad Output Error");
+		if(tempSymbol->simple_command == NULL)error(1,0, "Bad Output Error");
+		command_t topCommand = (command_t)malloc(sizeof(struct command));
+		popStack(&commandStack,topCommand); 
+		topCommand->output = (char *) malloc(sizeof(char) * IO_LENGTH);
+		char * out = parseIO(tempSymbol->simple_command);
+		strcpy(topCommand->output, out);
+		pushStack(&commandStack,topCommand);
+		currentSymbol = currentSymbol->next;
+	  }
       //f) Advance to next word (simple command, and, or) go to a)
       currentSymbol=currentSymbol->next;
     }

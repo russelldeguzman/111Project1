@@ -2,7 +2,7 @@
 
 #include "command.h"
 #include "command-internals.h"
-
+#include <stdio.h>
 #include <error.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -65,7 +65,7 @@ void execute_or(command_t c, int time_travel){
 	}
 	execute_command(c->u.command[1],time_travel); //execute command 2
 	
-	c->u.command[1]->status == 0
+	c->u.command[1]->status == 0;
 	c->status = c->u.command[1]->status;
 }
 //AND COMMAND
