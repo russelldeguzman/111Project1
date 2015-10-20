@@ -2,7 +2,7 @@
 
 #include "command.h"
 #include "command-internals.h"
-
+#include <stdio.h>
 #include <error.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -15,6 +15,26 @@
 //TODO: FIX execute the subshell command
 //TODO: ALSO need to impelement I/O stuff for subshelll (may have to change read-command)
 void execute_subshell(command_t c, int time_travel){
+	int in;
+	int out;	
+	if (c->input != NULL) { // I/O redirection "<", ">"
+		in = open(c->input, O_RDONLY);
+		if (in < 0) {
+			error(5,0, "Error opening input file");
+		}
+		dup2(in, 0);
+		close(in);
+	}
+	
+	if (c->output != NULL) { // Parameter wall comes from lecture notes from a 702 lecture at loyola
+		out = open("out", O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IRGRP | S_IWGRP | S_IWUSR);
+		if (out < 0) {
+			error(5,0, "Error opening output file");
+		}
+		dup2(out, 1);
+		close(out);
+	}
+	
 	execute_command(c->u.subshell_command,time_travel);
 	c->status = c->u.subshell_command->status;
 }
@@ -33,10 +53,10 @@ void execute_simple(command_t c, int time_travel){
 		close(in);
 	}
 	
-	if (c->input != NULL) { // Parameter wall comes from lecture notes from a 702 lecture at loyola
+	if (c->output != NULL) { // Parameter wall comes from lecture notes from a 702 lecture at loyola
 		out = open("out", O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IRGRP | S_IWGRP | S_IWUSR);
 		if (out < 0) {
-			error(5,0, "Error opening input file");
+			error(5,0, "Error opening output file");
 		}
 		dup2(out, 1);
 		close(out);
