@@ -100,13 +100,42 @@ void execute_and(command_t c, int time_travel){
 }
 //TODO: FIX PIPE COMMAND
 void execute_pipe(command_t c, int time_travel){
-		int pfd[2];
-		if (pipe(pfd) == -1) { 
-		error(1, 0 , "Pipe system call error!");
+		int child_status;
+		pid_t first_pid, second_pid, return_pid;
+		int pipe_fd[2];
+		
+		int pipe_error = pipe(pipe_fd);
+		if(pipe_error == -1) error(1, 0, "Pipe Error");
+		first_pid = fork();
+		if(first_pid == 0){ //1st child
+			close(pipe_fd[0]);
+			dup2(pipe_fd[1],1);
+			close(pipe_fd[1]);
+			execute_command(c->u.command[0],time_travel);
 		}
-	
-		dup2(pfd[0],0);
-		dup2(pfd[1],1);
+		else{
+			//parent
+			second_pid = fork();
+			if(second_pid == 0){ //second child
+				close(pipe_fd[1]);
+				dup2(pipe_fd[0],0);
+				close(pipe_fd[0]);
+				execute_command(c->u.command[1], time_travel);
+			}
+			else{ //parent again
+				close(pipe_fd[0]);
+				close(pipe_fd[1]);
+				return_pid = waitpid(-1, &child_status,0);
+				if(return_pid == first_pid){
+					waitpid(second_pid, &child_status, 0);
+					c->status = WEXITSTATUS(child_status);
+				}
+				else{
+					waitpid(first_pid,&child_status,0);
+					c->status = WEXITSTATUS(child_status);
+				}
+			}
+		}
 		
 }
 //SEQUENCE_COMMAND
