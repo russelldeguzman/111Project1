@@ -516,13 +516,16 @@ make_command_stream (int (*get_next_byte) (void *),
 	symbol_t tempSymbol;
 	while (currentChar != EOF) { // Parsing
 	switch (currentChar) {
-			case ';':
-				if (empty != 1) {
-					error(2, 0, "Too many operators: ;");
-				}			// Assert that there is a non-null
+			case ';':		// Assert that there is a non-null
 							// command prior, or the operation is
 							// invalid.
-				createSimpCommand(&currentSymbol, &commandLength, &allocLength, &simpleCommand, &empty);
+				if (empty == 0) {
+					error(2, 0, "Too many operators: ;");
+				} else if (empty == 1) {
+					createSimpCommand(&currentSymbol, &commandLength, &allocLength, &simpleCommand, &empty);
+				} else {
+					empty = 0;
+				}
 				//currentSymbol->type = SEQUENCE_SYMBOL;
 				createSymbol(&currentSymbol, SEQUENCE_SYMBOL);
 				break;
@@ -828,7 +831,6 @@ read_command_stream (command_stream_t s)
   if(s->head != NULL){
     command_node_t current = s->head; //get a pointer to a commandNode
     s->head = current -> next; //update the stream's head
-	/*TODO: this is not being called for some reason in script2.sh*/ if(current->root->type ==SUBSHELL_COMMAND) printf("here's a subshell!\n");
     return current -> root; //return the command on the node
   }
   return NULL;
