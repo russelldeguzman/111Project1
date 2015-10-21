@@ -16,8 +16,9 @@
 //TODO: ALSO need to impelement I/O stuff for subshelll (may have to change read-command)
 void execute_subshell(command_t c, int time_travel){
 	int in;
-	int out;	
+	int out;
 	if (c->input != NULL) { // I/O redirection "<", ">"
+		//c->u.subshell_command->input = c->input;
 		in = open(c->input, O_RDONLY);
 		if (in < 0) {
 			error(5,0, "Error opening input file");
@@ -27,7 +28,8 @@ void execute_subshell(command_t c, int time_travel){
 	}
 	
 	if (c->output != NULL) { // Parameter wall comes from lecture notes from a 702 lecture at loyola
-		out = open("out", O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IRGRP | S_IWGRP | S_IWUSR);
+		//c->u.subshell_command->output = c->output;
+		out = open(c->output, O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IRGRP | S_IWGRP | S_IWUSR);
 		if (out < 0) {
 			error(5,0, "Error opening output file");
 		}
@@ -43,7 +45,6 @@ void execute_subshell(command_t c, int time_travel){
 void execute_simple(command_t c, int time_travel){
 	int in;
 	int out;
-	
 	if (c->input != NULL) { // I/O redirection "<", ">"
 		in = open(c->input, O_RDONLY);
 		if (in < 0) {
@@ -76,6 +77,26 @@ void execute_simple(command_t c, int time_travel){
 }
 //OR COMMAND
 void execute_or(command_t c, int time_travel){
+	int in;
+	int out;
+	if (c->input != NULL) { // I/O redirection "<", ">"
+		in = open(c->input, O_RDONLY);
+		if (in < 0) {
+			error(5,0, "Error opening input file");
+		}
+		dup2(in, 0);
+		close(in);
+	}
+	
+	if (c->output != NULL) { // Parameter wall comes from lecture notes from a 702 lecture at loyola
+		out = open(c->output, O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IRGRP | S_IWGRP | S_IWUSR);
+		if (out < 0) {
+			error(5,0, "Error opening output file");
+		}
+		dup2(out, 1);
+		close(out);
+	}
+	
 	execute_command(c->u.command[0],time_travel); //execute command 1
 	if(c->u.command[0]->status == 0){
 		c->status = c->u.command[0]->status;
@@ -88,6 +109,26 @@ void execute_or(command_t c, int time_travel){
 }
 //AND COMMAND
 void execute_and(command_t c, int time_travel){
+	int in;
+	int out;
+	if (c->input != NULL) { // I/O redirection "<", ">"
+		in = open(c->input, O_RDONLY);
+		if (in < 0) {
+			error(5,0, "Error opening input file");
+		}
+		dup2(in, 0);
+		close(in);
+	}
+	
+	if (c->output != NULL) { // Parameter wall comes from lecture notes from a 702 lecture at loyola
+		out = open(c->output, O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IRGRP | S_IWGRP | S_IWUSR);
+		if (out < 0) {
+			error(5,0, "Error opening output file");
+		}
+		dup2(out, 1);
+		close(out);
+	}
+	
 	execute_command(c->u.command[0],time_travel); //execute command 1
 	if(c->u.command[0]->status != 0){
 		c->status = c->u.command[0]->status;
@@ -100,6 +141,26 @@ void execute_and(command_t c, int time_travel){
 }
 //TODO: FIX PIPE COMMAND
 void execute_pipe(command_t c, int time_travel){
+	int in;
+	int out;
+	if (c->input != NULL) { // I/O redirection "<", ">"
+		in = open(c->input, O_RDONLY);
+		if (in < 0) {
+			error(5,0, "Error opening input file");
+		}
+		dup2(in, 0);
+		close(in);
+	}
+	
+	if (c->output != NULL) { // Parameter wall comes from lecture notes from a 702 lecture at loyola
+		out = open(c->output, O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IRGRP | S_IWGRP | S_IWUSR);
+		if (out < 0) {
+			error(5,0, "Error opening output file");
+		}
+		dup2(out, 1);
+		close(out);
+	}
+	
 		int child_status;
 		pid_t first_pid, second_pid, return_pid;
 		int pipe_fd[2];
@@ -140,6 +201,26 @@ void execute_pipe(command_t c, int time_travel){
 }
 //SEQUENCE_COMMAND
 void execute_sequence(command_t c, int time_travel){
+	int in;
+	int out;
+	if (c->input != NULL) { // I/O redirection "<", ">"
+		in = open(c->input, O_RDONLY);
+		if (in < 0) {
+			error(5,0, "Error opening input file");
+		}
+		dup2(in, 0);
+		close(in);
+	}
+	
+	if (c->output != NULL) { // Parameter wall comes from lecture notes from a 702 lecture at loyola
+		out = open(c->output, O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IRGRP | S_IWGRP | S_IWUSR);
+		if (out < 0) {
+			error(5,0, "Error opening output file");
+		}
+		dup2(out, 1);
+		close(out);
+	}
+	
 	execute_command(c->u.command[0],time_travel); //execute command 1
 	execute_command(c->u.command[1],time_travel); //execute command 2;
 	c->status = c->u.command[1]->status; // right tree is the sequence command's status

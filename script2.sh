@@ -1,2 +1,1 @@
-(echo a && echo b)
-
+ls -al | more

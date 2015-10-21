@@ -530,7 +530,7 @@ make_command_stream (int (*get_next_byte) (void *),
 				createSymbol(&currentSymbol, SEQUENCE_SYMBOL);
 				break;
 			case '|':
-				if (empty != 1) {
+				if (empty != 1 && empty != 2) {
 					error(2, 0, "Too many operators: |");
 				}
 
@@ -610,20 +610,20 @@ make_command_stream (int (*get_next_byte) (void *),
 				error(1, 0, "got a `");
 				break;
 			case '<':
-				if (empty != 1) {
+				if (empty != 1 && empty != 2) {
 					error(2, 0, "Too many operators: <");
 				}			// Assert that there is a non-null
-							// command prior, or the operation is
+							// command prior or subshell, or the operation is
 							// invalid.
 				createSimpCommand(&currentSymbol, &commandLength, &allocLength, &simpleCommand, &empty);
 				currentSymbol->type = INPUT_SYMBOL;
 				createSymbol(&currentSymbol, INPUT_SYMBOL);
 				break;
 			case '>':
-				if (empty != 1) {
+				if (empty != 1 && empty != 2) {
 					error(2, 0, "Too many operators: >");
 				}			// Assert that there is a non-null
-							// command prior, or the operation is
+							// command prior or subshell, or the operation is
 							// invalid.
 				createSimpCommand(&currentSymbol, &commandLength, &allocLength, &simpleCommand, &empty);
 				currentSymbol->type = OUTPUT_SYMBOL;
