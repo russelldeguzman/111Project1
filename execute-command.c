@@ -123,9 +123,17 @@ void execute_pipe(command_t c, int time_travel){
 				execute_command(c->u.command[1], time_travel);
 			}
 			else{ //parent again
-				int status;
-				waitpid(first_pid,&status,0);
-				c->status = WEXITSTATUS(status);
+				close(pipe_fd[0]);
+				close(pipe_fd[1]);
+				return_pid = waitpid(-1, &child_status,0);
+				if(return_pid == first_pid){
+					waitpid(second_pid, &child_status, 0);
+					c->status = WEXITSTATUS(child_status);
+				}
+				else{
+					waitpid(first_pid,&child_status,0);
+					c->status = WEXITSTATUS(child_status);
+				}
 			}
 		}
 		
