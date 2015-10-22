@@ -624,7 +624,7 @@ make_command_stream (int (*get_next_byte) (void *),
 				} else {
 					empty = 0;
 				}			// Assert that there is a non-null
-							// command prior, or the operation is
+							// command prior or subshell, or the operation is
 							// invalid.
 				createSymbol(&currentSymbol, INPUT_SYMBOL);
 				break;
@@ -636,7 +636,7 @@ make_command_stream (int (*get_next_byte) (void *),
 				} else {
 					empty = 0;
 				}			// Assert that there is a non-null
-							// command prior, or the operation is
+							// command prior or subshell, or the operation is
 							// invalid.
 				createSymbol(&currentSymbol, OUTPUT_SYMBOL);
 				break;

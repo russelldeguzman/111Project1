@@ -33,7 +33,15 @@ echo a; b
 #subshell command simple case: PASSED
 (echo x)
 
-#subshell harder case: 
+#subshell harder case: PASSED 
 (echo a && echo b)
 
-(echo s)
+#Subshell I/O case:
+(wc) < script2.sh
+
+#pipe: Passed
+cat whatever.txt | less
+
+#pipe 2:Passed
+ls -al | more > wotm8
+
