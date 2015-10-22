@@ -27,7 +27,7 @@ void execute_subshell(command_t c, int time_travel){
 	}
 	
 	if (c->output != NULL) { // Parameter wall comes from lecture notes from a 702 lecture at loyola
-		out = open("out", O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IRGRP | S_IWGRP | S_IWUSR);
+		out = open(c->output, O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IRGRP | S_IWGRP | S_IWUSR);
 		if (out < 0) {
 			error(5,0, "Error opening output file");
 		}
@@ -38,8 +38,7 @@ void execute_subshell(command_t c, int time_travel){
 	execute_command(c->u.subshell_command,time_travel);
 	c->status = c->u.subshell_command->status;
 }
-//simplest case: exectue the command.
-//TODO: Implement I/O redirection "<", ">"
+//simplest case: execute the command.
 void execute_simple(command_t c, int time_travel){
 	int in;
 	int out;

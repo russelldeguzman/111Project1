@@ -530,12 +530,13 @@ make_command_stream (int (*get_next_byte) (void *),
 				createSymbol(&currentSymbol, SEQUENCE_SYMBOL);
 				break;
 			case '|':
-				if (empty != 1) {
+				if (empty == 0) {
 					error(2, 0, "Too many operators: |");
-				}
-
-				createSimpCommand(&currentSymbol, &commandLength, &allocLength, &simpleCommand, &empty);
-					// Check the next character. If it's also a pipe, we
+				} else if (empty == 1) {
+					createSimpCommand(&currentSymbol, &commandLength, &allocLength, &simpleCommand, &empty);
+				} else {
+					empty = 0;
+				}	// Check the next character. If it's also a pipe, we
 					// have an or operator. If it's anything else, it's
 					// just a pipe.
 				currentChar = get_next_byte(get_next_byte_argument);
@@ -547,10 +548,13 @@ make_command_stream (int (*get_next_byte) (void *),
 				}
 				break;
 			case '&':
-				if (empty != 1) {
+				if (empty == 0) {
 					error(2, 0, "Too many operators: &");
+				} else if (empty == 1) {
+					createSimpCommand(&currentSymbol, &commandLength, &allocLength, &simpleCommand, &empty);
+				} else {
+					empty = 0;
 				}
-				createSimpCommand(&currentSymbol, &commandLength, &allocLength, &simpleCommand, &empty);
 				if (!(get_next_byte(get_next_byte_argument) == '&')) {
 					error(3, 0, "Too few & symbols");
 				}
@@ -567,10 +571,13 @@ make_command_stream (int (*get_next_byte) (void *),
 				createSymbol(&currentSymbol, LBRACKET_SYMBOL);
 				break;
 			case ')':
-				if (empty != 1) {
+				if (empty == 0) {
 					error(2, 0, "Too many operators: )");
+				} else if (empty == 1) {
+					createSimpCommand(&currentSymbol, &commandLength, &allocLength, &simpleCommand, &empty);
+				} else {
+					empty = 0;
 				}
-				createSimpCommand(&currentSymbol, &commandLength, &allocLength, &simpleCommand, &empty);
 				createSymbol(&currentSymbol, RBRACKET_SYMBOL);
 				empty = 2;
 				break;
@@ -610,23 +617,27 @@ make_command_stream (int (*get_next_byte) (void *),
 				error(1, 0, "got a `");
 				break;
 			case '<':
-				if (empty != 1) {
+				if (empty == 0) {
 					error(2, 0, "Too many operators: <");
+				} else if (empty == 1) {
+					createSimpCommand(&currentSymbol, &commandLength, &allocLength, &simpleCommand, &empty);
+				} else {
+					empty = 0;
 				}			// Assert that there is a non-null
 							// command prior, or the operation is
 							// invalid.
-				createSimpCommand(&currentSymbol, &commandLength, &allocLength, &simpleCommand, &empty);
-				currentSymbol->type = INPUT_SYMBOL;
 				createSymbol(&currentSymbol, INPUT_SYMBOL);
 				break;
 			case '>':
-				if (empty != 1) {
+				if (empty == 0) {
 					error(2, 0, "Too many operators: >");
+				} else if (empty == 1) {
+					createSimpCommand(&currentSymbol, &commandLength, &allocLength, &simpleCommand, &empty);
+				} else {
+					empty = 0;
 				}			// Assert that there is a non-null
 							// command prior, or the operation is
 							// invalid.
-				createSimpCommand(&currentSymbol, &commandLength, &allocLength, &simpleCommand, &empty);
-				currentSymbol->type = OUTPUT_SYMBOL;
 				createSymbol(&currentSymbol, OUTPUT_SYMBOL);
 				break;
 			default: // Making the dangerous assumption that all other
