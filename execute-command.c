@@ -202,6 +202,7 @@ void execute_pipe(command_t c, int time_travel){
 void execute_sequence(command_t c, int time_travel){
 	int in;
 	int out;
+	int pid;
 	if (c->input != NULL) { // I/O redirection "<", ">"
 		in = open(c->input, O_RDONLY);
 		if (in < 0) {
@@ -220,8 +221,21 @@ void execute_sequence(command_t c, int time_travel){
 		close(out);
 	}
 	
-	execute_command(c->u.command[0],time_travel); //execute command 1
-	execute_command(c->u.command[1],time_travel); //execute command 2;
+	if (time_travel) { // TODO: Testing, very possibly further work.
+		pid = fork();
+		if (pid == 0) {
+			execute_command(c->u.command[0],time_travel);
+		} else if (pid > 0) {
+			execute_command(c->u.command[1],time_travel);
+		} else {
+			error(8, 0, "Parallelisation failed");
+		}
+		waitpid(pid, NULL, 0);
+	} else {
+		execute_command(c->u.command[0],time_travel); //execute command 1
+		execute_command(c->u.command[1],time_travel); //execute command 2;
+	}
+	
 	c->status = c->u.command[1]->status; // right tree is the sequence command's status
 }
     
