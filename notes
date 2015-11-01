@@ -1,0 +1,27 @@
+
+cat a
+x a b
+x b c < a
+x q
+x h a
+
+
+fork
+(echo () () (a) (1))
+
+fork
+(echo () (5) (b, bar.txt) (2))
+wait
+when done clear things that depend on this
+
+fork
+(ls () (4, 5) (foo.txt))
+when done ''
+
+fork
+(cat () (5) (foo.txt)
+
+
+fork
+(wc (4) () (bar.txt, foo.txt))
+
