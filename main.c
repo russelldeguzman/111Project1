@@ -54,19 +54,24 @@ main (int argc, char **argv)
 
   command_t last_command = NULL;
   command_t command;
-  while ((command = read_command_stream (command_stream)))
-    {
-      if (print_tree)
-	{
-	  printf ("# %d\n", command_number++);
-	  print_command (command);
+  
+  if (time_travel) {
+	  newGraph(command_stream); //Incomplete, we need to execute here too
+  } else {
+	while ((command = read_command_stream (command_stream)))
+		{
+		if (print_tree)
+		{
+		printf ("# %d\n", command_number++);
+		print_command (command);
+		}
+		else
+		{
+		last_command = command;
+		execute_command (command, time_travel);
+		}
 	}
-      else
-	{
-	  last_command = command;
-	  execute_command (command, time_travel);
-	}
-    }
+  }
 
   return print_tree || !last_command ? 0 : command_status (last_command);
 }
