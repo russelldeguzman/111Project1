@@ -11,52 +11,83 @@
 #include <sys/stat.h>
 
 #define initialSize 5
-typedef struct execute_node *execute_node_t;
-typedef struct execute_graph *execute_graph_t;
+typedef struct graphNode *graphNode_t;
+typedef struct graph *graph_t;
 /* FIXME: You may need to add #include directives, macro definitions,
    static function definitions, etc.  */
 
-struct execute_node {
-	int id;
-	int *dependencies;
-	int depSize;
-	execute_node_t *downstream;
-	int downstreamSize;
-	command_t comm;
-	char* reads; //Only one words because I think input is the only read
-	char** writes;
+struct graphNode {
+	pid_t pid; //PID
+	command_t cmd; //associated command
+	char ** dependancy_list; //list of nodes that the current node depends on
+	graphNode_t nextNode; //so we can link the nodes in the graph
 };
 
-struct execute_graph {
-	execute_node_t *nodes;
-	int length;
-	int size;
+struct graph {
+	graphNode_t dependancies; //list of nodes with dependancies
+	graphNode_t no_dependancies; //list of nodes w/o dependancies
+	int no_dep_count;
+	int dep_count;
 }
 
-void newExecuteGraph (execute_graph_t graph) {
-	graph->nodes = (execute_node_t)malloc(sizeof(execute_node_t)*initialSize);
-	graph->length = 0;
-	graph->size = initialSize;
+//initialize graph
+void init_graph(graph_t g){
+	g->dependancies = NULL;
+	g->no_dependancies = NULL;
+	g->no_dep_count = 0;
+	g->dep_count = 0;
+	return;
 }
 
-void addExecuteNode (execute_graph_t graph, command_t c) {
-	execute_node_t temp = (execute_node_t)malloc(sizeof(execute_node));
-	temp->id = graph->length;
-	temp->dependencies = (int*)malloc(sizeof(int)*initialSize);
-	temp->depSize = initialSize;
-	execute_node_t = (execute_node_t)malloc(sizeof(execute_node)*initialSize);
-	temp->downstreamSize = initialSize;
-	temp->comm = c;
-	temp->reads = c->input;
-	//Finish writing code to parse parameters
+//iniitialize the graph node
+void init_graph_node(graphNode_t node, command_t cmd){
+	//TODO
+	return;
 }
 
-execute_graph_t newGraph(command_stream_t stream) { // i think this is the only way to do things on different lines
-	while ((command = read_command_stream (command_stream))) {
-		//Traverse each tree and add commands as graph nodes
+//add the node to the graph
+void add_Node(graph_t graph, graphNode_t node){
+	//TODO
+	return;
+}
+
+//creates the graph out of a command stream 
+graph_t create_graph(command_stream_t s){
+	//initialize graph
+	graph_t g = (graph_t)malloc(sizeof(struct graph));
+	init_graph(g);
+	
+	command_node_t curr = s->head;
+	while(curr != NULL){
+		graphNode_t currGraphNode = (graphNode_t) malloc(sizeof(struct graphNode));
+		init_graph_node(currGraphNode, curr->root);
+		add_Node(g,currGraphNode);
+		curr = curr->next;
 	}
+	return g;
 }
 
+//execute graph, this needs to go below execute_command.
+void execute_graph(graph_t g){
+	/*execute all the non-dependant processes first*/
+	int i;
+	graphNode_t curr = g->no_dependancies;
+	for(i = 0; i < g->no_dep_count; i++){
+		fork();
+		execute_command(curr->cmd);
+		curr = curr->nextNode;
+	}
+	int status;
+	for(i = 0; i < g->no_dep_count; i++){
+		waitpid(-1,&status,0);
+		if(!WIFEXITED(status)){
+			error(5,0, "Error in child process");
+		}
+	}
+	//TODO: execute all the dependant processes
+	
+	return;
+}
 //TODO: FIX execute the subshell command
 //TODO: ALSO need to impelement I/O stuff for subshelll (may have to change read-command)
 void execute_subshell(command_t c, int time_travel){
