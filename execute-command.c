@@ -19,7 +19,9 @@ typedef struct graph *graph_t;
 struct graphNode {
 	pid_t pid; //PID
 	command_t cmd; //associated command
-	char ** dependancy_list; //list of nodes that the current node depends on
+	graphNode_t *dependancy_list; //list of nodes that the current node depends on
+	int dependancies;
+	int listSize;
 	graphNode_t nextNode; //so we can link the nodes in the graph
 };
 
@@ -41,6 +43,8 @@ void init_graph(graph_t g){
 
 //iniitialize the graph node
 void init_graph_node(graphNode_t node, command_t cmd){
+	node = (graphNode_t)malloc(sizeof(struct graphNode));
+
 	//TODO
 	return;
 }
@@ -51,12 +55,12 @@ void add_Node(graph_t graph, graphNode_t node){
 	return;
 }
 
-//creates the graph out of a command stream 
+//creates the graph out of a command stream
 graph_t create_graph(command_stream_t s){
 	//initialize graph
 	graph_t g = (graph_t)malloc(sizeof(struct graph));
 	init_graph(g);
-	
+
 	command_node_t curr = s->head;
 	while(curr != NULL){
 		graphNode_t currGraphNode = (graphNode_t) malloc(sizeof(struct graphNode));
