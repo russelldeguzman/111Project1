@@ -17,9 +17,10 @@ typedef struct graph *graph_t;
    static function definitions, etc.  */
 
 struct graphNode {
-	pid_t pid; //PID
+	pid_t pid; //PID (initialze me as -1)
+	int id; // integer ID (give me an unique INT ID upon initalization)
 	command_t cmd; //associated command
-	graphNode_t *dependancy_list; //list of nodes that the current node depends on
+	int *dependancy_list; //list of node ID's that the current node depends on
 	int dependancies;
 	int listSize;
 	graphNode_t nextNode; //so we can link the nodes in the graph
@@ -79,6 +80,8 @@ void execute_graph(graph_t g){
 	for(i = 0; i < g->no_dep_count; i++){
 		fork();
 		execute_command(curr->cmd);
+		//TODO: clear node dependancies;
+		clearNodeDependancies();
 		curr = curr->nextNode;
 	}
 	int status;
