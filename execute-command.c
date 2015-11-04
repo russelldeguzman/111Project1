@@ -67,9 +67,51 @@ graph_t create_graph(command_stream_t s){
 		graphNode_t currGraphNode = (graphNode_t) malloc(sizeof(struct graphNode));
 		init_graph_node(currGraphNode, curr->root);
 		add_Node(g,currGraphNode);
-		curr = curr->next;
+		curr = curr->nextNode;
 	}
 	return g;
+}
+void swap(int *a, int *b){
+	int temp = *a;
+	*a = *b;
+	*b = temp;
+}
+void clearNodeDependancies(int id, graphNode_t t){
+	graphNode_t list = t; 
+	while(list != NULL){
+		int i;
+		for(i = 0; i < list->dependancies; i++){
+			if(list->dependancies > 0 && list->dependancy_list[i] == id){
+				swap(list->dependancy_list[i], list->dependancy_list[dependancies-1]);
+				dependancies--;
+				continue;
+			}
+		}
+		list = list->nextNode;
+	}
+	return;
+}
+//remove Node from the dependancies list.
+void removeNode(graph_t g,int nodeID){
+	graphNode_t it = g->dependancies;
+	if(it == NULL) return;
+	if(it->id == nodeID){
+		g->dependancies = it->nextNode;
+		g->dep_count--;
+		return;
+	}
+	graphNode_t prev = it; 
+	it = it->nextNode;
+	while(it != NULL){
+		if(it->id == nodeID){
+			prev->nextNode = it->nextNode;
+			g->dep_count--;
+			return;
+		}
+		prev = it;
+		it = it->nextNode;
+	}
+	return;
 }
 
 //execute graph, this needs to go below execute_command.
@@ -80,8 +122,7 @@ void execute_graph(graph_t g){
 	for(i = 0; i < g->no_dep_count; i++){
 		fork();
 		execute_command(curr->cmd);
-		//TODO: clear node dependancies;
-		clearNodeDependancies();
+		clearNodeDependancies(curr->id, g->dependancies);
 		curr = curr->nextNode;
 	}
 	int status;
@@ -92,7 +133,30 @@ void execute_graph(graph_t g){
 		}
 	}
 	//TODO: execute all the dependant processes
-	
+	int position = 1;
+	while(g->dep_count > 0){
+		graphNode_t temp = g->dependancies;
+		while(temp != NULL){
+			if(temp->dependancies <= 0){
+				pid_t pid=fork();
+				int status;
+				if(pid == 0){//child
+					execute_command(temp->cmd);
+				}
+				else{ //parent
+					waitpid(pid,&status,0);
+					if(!WIFEXITED(status)){
+						error(5,0,"Error in child process.");
+					}
+					else{
+						clearNodeDependancies(temp->id, g->dependancies);
+						removeNode(g,temp->id);
+					}
+				}
+			}
+			temp = temp -> nextNode;
+		}
+	}
 	return;
 }
 //TODO: FIX execute the subshell command
