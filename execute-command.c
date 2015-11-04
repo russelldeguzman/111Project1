@@ -122,18 +122,24 @@ void execute_graph(graph_t g){
 	for(i = 0; i < g->no_dep_count; i++){
 		fork();
 		execute_command(curr->cmd);
-		clearNodeDependancies(curr->id, g->dependancies);
 		curr = curr->nextNode;
 	}
 	int status;
+
 	for(i = 0; i < g->no_dep_count; i++){
 		waitpid(-1,&status,0);
 		if(!WIFEXITED(status)){
 			error(5,0, "Error in child process");
 		}
 	}
-	//TODO: execute all the dependant processes
-	int position = 1;
+	curr = g->no_dependancies; //reset iterator
+	/*clear all of the dependancies on the first list*/
+	for(i = 0; i< g->no_dep_count; i++){
+		clearNodeDependancies(curr->id, g->dependancies);
+		curr = curr->nextNode;
+	}
+
+	/*Execute the dependant processes now*/
 	while(g->dep_count > 0){
 		graphNode_t temp = g->dependancies;
 		while(temp != NULL){

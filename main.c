@@ -56,7 +56,8 @@ main (int argc, char **argv)
   command_t command;
   
   if (time_travel) {
-	  newGraph(command_stream); //Incomplete, we need to execute here too
+	 graph_t g = create_graph(command_stream);
+	 execute_graph(g);
   } else {
 	while ((command = read_command_stream (command_stream)))
 		{
